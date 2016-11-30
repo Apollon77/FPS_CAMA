@@ -1,4 +1,4 @@
-/* 
+/*
 	FPS_CAMA.h v1.0 - Library for controlling the CAMA Finger Print Scanner (FPS)
 	Created by Ingo Fischer, December 2015
 	Licensed for non-commercial use, must include this license message
@@ -21,7 +21,7 @@ Command_Packet::Command_Packet(Commands::Commands_Enum _command, word _dataLengt
 byte* Command_Packet::getPacketBytes()
 {
 	byte* packetbytes= new byte[24];
-	
+
 	// update command before calculating checksum (important!)
 	word cmd = command;
 
@@ -57,7 +57,7 @@ byte Command_Packet::getLowByte(word w)
 
 // add a byte to CommandData array starting at Index index
 //DONE
-void Command_Packet::addByteToCommandData(byte index, byte value) 
+void Command_Packet::addByteToCommandData(byte index, byte value)
 {
 	commandData[index] = value;
 }
@@ -112,14 +112,14 @@ Response_Packet::Response_Packet(byte* buffer, word awaitedResponseCode, bool us
 	byte responseCode_high=getHighByte(awaitedResponseCode);
 	validResponse &= checkParsing(buffer[2], responseCode_low, responseCode_low, "ResponseCode_HIGH", useSerialDebug);
 	validResponse &= checkParsing(buffer[3], responseCode_high, responseCode_high, "ResponseCode_LOW", useSerialDebug);
-	
+
 	dataLength=wordFromBytes(buffer,4)-2;
-	
+
 	word errorRet = wordFromBytes(buffer,6);
 	if (errorRet==0) isError=false;
 	  else if (errorRet==1) isError=true;
 	  else validResponse=false;
-		
+
 	memset(dataBytes, 0, sizeof(dataBytes)); // Clear DataBytes Array
 	if (dataLength>0) {
 		for (int i=0; i < dataLength; i++)
@@ -246,7 +246,7 @@ bool Response_Packet::checkParsing(byte b, byte propervalue, byte alternatevalue
 
 
 
-#pragma region -= Data_Packet =- 
+#pragma region -= Data_Packet =-
 //void Data_Packet::StartNewPacket()
 //{
 //	Data_Packet::NextPacketID = 0;
@@ -261,12 +261,12 @@ FPS_CAMA::FPS_CAMA(Stream& streamInstance)
 	: _serial(&streamInstance)
 {
   // nothing to do
-}; 
+};
 
 /*
   [Function]
      One to one match
-  
+
   [Parameter]
   	 templateId - ID of template to verify the scanned finger with
 
@@ -283,17 +283,17 @@ FPS_CAMA::FPS_CAMA(Stream& streamInstance)
 	5) else result=GD_NEED_RELEASE_FINGER, denote that lift finger;
 	6) verify the captured fingerprint with the appoint templatedata
 	   if verify ok ,result=Template No.; else result= ERR_VERIFY;
-	7) In the period of process verify command, if module received “FPCancel” command, 
+	7) In the period of process verify command, if module received “FPCancel” command,
 	   The module then stop verify command and return ACK that is ERR_FP_CANCEL;
 */
 bool FPS_CAMA::verify(word templateId)
 {
 	bool res = false;
 	if (useSerialDebug) Serial.println("FPS - verify");
-	
+
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::Verify,2);
 	cp->addWordToCommandData(0, templateId);
-	
+
 	byte* packetbytes = cp->getPacketBytes();
 	sendCommand(packetbytes, 24);
 	delete packetbytes;
@@ -301,7 +301,7 @@ bool FPS_CAMA::verify(word templateId)
 
 	Response_Packet* rp1 = getResponse(Command_Packet::Commands::Verify);
 
-	lastResultCode = NULL;
+	lastResultCode = 0xFFFF;
 	if (rp1->validResponse) {
 		if (rp1->dataLength > 0) lastResultCode = rp1->wordFromBytes(rp1->dataBytes,0);
 		if (! rp1->isError) {
@@ -311,11 +311,11 @@ bool FPS_CAMA::verify(word templateId)
 				    cancel=(! userActionCallback(Command_Packet::Commands::Verify, Response_Packet::ResultCodes::GD_NEED_RELEASE_FINGER));
 				    if (cancel) {
 				    	//TODO FPCancel!
-				    } 
+				    }
 				}
 				if (! cancel) {
 					Response_Packet* rp2 = getResponse(Command_Packet::Commands::Verify);
-					lastResultCode = NULL;
+					lastResultCode = 0xFFFF;
 					if (rp2->validResponse) {
 						if (rp2->dataLength > 0) lastResultCode = rp2->resultCode;
 						if ((! rp2->isError) && (rp2->dataLength == 2)) {
@@ -327,9 +327,9 @@ bool FPS_CAMA::verify(word templateId)
 				}
 			}
 		}
-	}	
+	}
 	delete rp1;
-	
+
 	if (useSerialDebug) {
 		Serial.print("FPS - verify Result=");
 		Serial.print(res);
@@ -337,16 +337,16 @@ bool FPS_CAMA::verify(word templateId)
 		Serial.print(lastResultCode, HEX);
 		Serial.println();
 	}
-	
+
 	return res;
 }
 
 /*
   [Function]
      One to many match
-     The live scanning fingerprint matches to all templates stored in FLASH memory, and then 
+     The live scanning fingerprint matches to all templates stored in FLASH memory, and then
      respond the result.
-  
+
   [Parameter]
   	 None
 
@@ -369,9 +369,9 @@ word FPS_CAMA::identify()
 {
 	word res = 0;
 	if (useSerialDebug) Serial.println("FPS - identify");
-	
+
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::Identify,0);
-	
+
 	byte* packetbytes = cp->getPacketBytes();
 	sendCommand(packetbytes, 24);
 	delete packetbytes;
@@ -379,7 +379,7 @@ word FPS_CAMA::identify()
 
 	Response_Packet* rp1 = getResponse(Command_Packet::Commands::Identify);
 
-	lastResultCode = NULL;
+	lastResultCode = 0xFFFF;
 	if (rp1->validResponse) {
 		if (rp1->dataLength > 0) lastResultCode = rp1->wordFromBytes(rp1->dataBytes,0);
 		if (! rp1->isError) {
@@ -389,11 +389,11 @@ word FPS_CAMA::identify()
 				    cancel=(! userActionCallback(Command_Packet::Commands::Identify, Response_Packet::ResultCodes::GD_NEED_RELEASE_FINGER));
 				    if (cancel) {
 				    	//TODO FPCancel!
-				    } 
+				    }
 				}
 				if (! cancel) {
 					Response_Packet* rp2 = getResponse(Command_Packet::Commands::Identify);
-					lastResultCode = NULL;
+					lastResultCode = 0xFFFF;
 					if (rp2->validResponse) {
 						if (rp2->dataLength > 0) lastResultCode = rp2->resultCode;
 						if ((! rp2->isError) && (rp2->dataLength == 2)) {
@@ -404,9 +404,9 @@ word FPS_CAMA::identify()
 				}
 			}
 		}
-	}	
+	}
 	delete rp1;
-	
+
 	if (useSerialDebug) {
 		Serial.print("FPS - identify Result templateId=");
 		Serial.print(res);
@@ -414,7 +414,7 @@ word FPS_CAMA::identify()
 		Serial.print(lastResultCode, HEX);
 		Serial.println();
 	}
-	
+
 	return res;
 }
 
@@ -422,10 +422,10 @@ word FPS_CAMA::identify()
   [Function]
      Enroll
      In the process of enroll, The same finger must be press on the sensor for 3 times,
-     each time module get template temporary and storage in RAM, if the three templates 
-     are correct, the module generalize the three templates to one template then write 
+     each time module get template temporary and storage in RAM, if the three templates
+     are correct, the module generalize the three templates to one template then write
      to Flash memory.
-  
+
   [Parameter]
   	 templateId - ID of template to store the scanned finger in
 
@@ -442,7 +442,7 @@ word FPS_CAMA::identify()
        if image is no good,result=ERR_BAD_QUALITY
     6) else result=GD_NEED_RELEASE_FINGER denote that lift finger,
        after finger release then goto next step;
-    7) result=GD_NEED_SECOND_SWEEP denote that press the same finger for the second time, 
+    7) result=GD_NEED_SECOND_SWEEP denote that press the same finger for the second time,
        and then goto steep 4,5
     8) if the second input fingerprint is correct,
        result=GD_NEED_RELEASE_FINGER denote that lift finger,
@@ -454,21 +454,21 @@ word FPS_CAMA::identify()
    11) the module generalize the three templates to one template,
        success goto step 12, fail result=ERR_GENERALIZE;
    12) if Duplication Check=OFF, storage the template data and return result=Template No;
-   13) if Duplication Check=ON, the template data match to all template to check whether 
+   13) if Duplication Check=ON, the template data match to all template to check whether
        exist duplicated fingerprint or not. if yes, result = ERR_DUPLICATION_ID;
        else result = Template No. and sorage the template data;
-   14) In the period of process ENROLL command,if module received FP Cancel command, 
+   14) In the period of process ENROLL command,if module received FP Cancel command,
        the module then stop ENROLL command and return ACK that is ERR_FP_CANCEL;
 */
 bool FPS_CAMA::enroll(word templateId)
 {
 	bool res = false;
 	if (useSerialDebug) Serial.println("FPS - enroll");
-	
+
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::Enroll,2);
 	cp->addWordToCommandData(0, templateId);
 
-	
+
 	byte* packetbytes = cp->getPacketBytes();
 	sendCommand(packetbytes, 24);
 	delete packetbytes;
@@ -477,7 +477,7 @@ bool FPS_CAMA::enroll(word templateId)
 	while (true) {
 		Response_Packet* rp = getResponse(Command_Packet::Commands::Enroll);
 
-		lastResultCode = NULL;
+		lastResultCode = 0xFFFF;
 		if (rp->validResponse) {
 			if (rp->dataLength > 0) lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
 			bool awaitReleaseFinger=false;
@@ -502,7 +502,7 @@ bool FPS_CAMA::enroll(word templateId)
 					  // TODO FPCancel senden
 					  break;
 					}
-					
+
 					bool cancel=false;
 					if (userActionCallback) {
 					    cancel=(! userActionCallback(Command_Packet::Commands::Enroll, Response_Packet::ResultCodes::parseFromBytes(lastResultCode)));
@@ -527,8 +527,8 @@ bool FPS_CAMA::enroll(word templateId)
 			}
 		}
 		delete rp;
-	}	
-	
+	}
+
 	if (useSerialDebug) {
 		Serial.print("FPS - enroll Result templateId=");
 		Serial.print(res);
@@ -536,16 +536,16 @@ bool FPS_CAMA::enroll(word templateId)
 		Serial.print(lastResultCode, HEX);
 		Serial.println();
 	}
-	
+
 	return res;
 }
 
 /*
   [Function]
      Enroll One Time
-     Enroll command require the same finger press on the sensor for 3 times,Corresponding 
+     Enroll command require the same finger press on the sensor for 3 times,Corresponding
      Enroll One Time command require the finger press on sensor for one time only
-  
+
   [Parameter]
   	 templateId - ID of template to store the scanned finger in
 
@@ -561,10 +561,10 @@ bool FPS_CAMA::enroll(word templateId)
        if image is no good,result=ERR_BAD_QUALITY
     5) else result=GD_NEED_RELEASE_FINGER denote that lift finger,
     6) if Duplication Check=OFF, storage the template data and return result=Template No;
-    7) if Duplication Check=ON, the template data match to all template to check whether 
+    7) if Duplication Check=ON, the template data match to all template to check whether
        exist duplicated fingerprint or not. if yes, result = ERR_DUPLICATION_ID;
        else result = Template No. and sorage the template data;
-    8) In the period of process ENROLL One Time command,if module received FP Cancel command, 
+    8) In the period of process ENROLL One Time command,if module received FP Cancel command,
        the module then stop ENROLL One Time command and return ACK that is ERR_FP_CANCEL;
     NOTE: we recommend using Enroll command,disapproval using Enroll one time command
 */
@@ -572,10 +572,10 @@ bool FPS_CAMA::enrollOneTime(word templateId)
 {
 	bool res = false;
 	if (useSerialDebug) Serial.println("FPS - enrollOneTime");
-	
+
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::EnrollOneTime,2);
 	cp->addWordToCommandData(0, templateId);
-	
+
 	byte* packetbytes = cp->getPacketBytes();
 	sendCommand(packetbytes, 24);
 	delete packetbytes;
@@ -583,7 +583,7 @@ bool FPS_CAMA::enrollOneTime(word templateId)
 
 	Response_Packet* rp1 = getResponse(Command_Packet::Commands::EnrollOneTime);
 
-	lastResultCode = NULL;
+	lastResultCode = 0xFFFF;
 	if (rp1->validResponse) {
 		if (rp1->dataLength > 0) lastResultCode = rp1->wordFromBytes(rp1->dataBytes,0);
 		if (! rp1->isError) {
@@ -593,11 +593,11 @@ bool FPS_CAMA::enrollOneTime(word templateId)
 				    cancel=(! userActionCallback(Command_Packet::Commands::EnrollOneTime, Response_Packet::ResultCodes::GD_NEED_RELEASE_FINGER));
 				    if (cancel) {
 				    	//TODO FPCancel!
-				    } 
+				    }
 				}
 				if (! cancel) {
 					Response_Packet* rp2 = getResponse(Command_Packet::Commands::EnrollOneTime);
-					lastResultCode = NULL;
+					lastResultCode = 0xFFFF;
 					if (rp2->validResponse) {
 						if (rp2->dataLength > 0) lastResultCode = rp2->resultCode;
 						if ((! rp2->isError) && (rp2->dataLength == 2)) {
@@ -609,9 +609,9 @@ bool FPS_CAMA::enrollOneTime(word templateId)
 				}
 			}
 		}
-	}	
+	}
 	delete rp1;
-	
+
 	if (useSerialDebug) {
 		Serial.print("FPS - enrollOneTime Result=");
 		Serial.print(res);
@@ -619,16 +619,16 @@ bool FPS_CAMA::enrollOneTime(word templateId)
 		Serial.print(lastResultCode, HEX);
 		Serial.println();
 	}
-	
+
 	return res;
 }
 
 /*
   [Function]
      Clear Template
-     Delete fingerprint data with specified ID from database. After this command is 
+     Delete fingerprint data with specified ID from database. After this command is
      executed, fingerprint data with specified ID are deleted immediately.
-  
+
   [Parameter]
   	 templateId - ID of template to clear
 
@@ -637,17 +637,17 @@ bool FPS_CAMA::enrollOneTime(word templateId)
 
   [Operation Sequence]
 	1) if the appoint template No. is invalid, result= ERR_INVALID_TMPL_NO
-	2) if the appoint template No. is inexistence template data, result=ERR_TMPL_EMPTY 
+	2) if the appoint template No. is inexistence template data, result=ERR_TMPL_EMPTY
 	3) else delete specified template data and then return response packet
 */
 bool FPS_CAMA::clearTemplate(word templateId)
 {
 	bool res = false;
 	if (useSerialDebug) Serial.println("FPS - clearTemplate");
-	
+
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::ClearTemplate,2);
 	cp->addWordToCommandData(0, templateId);
-	
+
 	byte* packetbytes = cp->getPacketBytes();
 	sendCommand(packetbytes, 24);
 	delete packetbytes;
@@ -655,7 +655,7 @@ bool FPS_CAMA::clearTemplate(word templateId)
 
 	Response_Packet* rp = getResponse(Command_Packet::Commands::ClearTemplate);
 
-	lastResultCode = NULL;
+	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		if (rp->dataLength > 0) lastResultCode = rp->resultCode;
 		if ((! rp->isError) && (rp->dataLength == 2)) {
@@ -663,9 +663,9 @@ bool FPS_CAMA::clearTemplate(word templateId)
 				else lastResultCode=Response_Packet::ResultCodes::ERR_FAIL;
 		}
 		else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
-	}	
+	}
 	delete rp;
-	
+
 	if (useSerialDebug) {
 		Serial.print("FPS - clearTemplate Result=");
 		Serial.print(res);
@@ -673,16 +673,16 @@ bool FPS_CAMA::clearTemplate(word templateId)
 		Serial.print(lastResultCode, HEX);
 		Serial.println();
 	}
-	
+
 	return res;
 }
 
 /*
   [Function]
      Clear All Template
-     Delete all fingerprint data in database. After this command is executed, all 
+     Delete all fingerprint data in database. After this command is executed, all
      fingerprint data in database are deleted immediately.
-  
+
   [Parameter]
   	 None
 
@@ -693,9 +693,9 @@ word FPS_CAMA::clearAllTemplate()
 {
 	word res = 0;
 	if (useSerialDebug) Serial.println("FPS - clearAllTemplate");
-	
+
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::ClearAllTemplate,0);
-	
+
 	byte* packetbytes = cp->getPacketBytes();
 	sendCommand(packetbytes, 24);
 	delete packetbytes;
@@ -703,13 +703,13 @@ word FPS_CAMA::clearAllTemplate()
 
 	Response_Packet* rp = getResponse(Command_Packet::Commands::ClearAllTemplate);
 
-	lastResultCode = NULL;
+	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
 		if ((! rp->isError) && (rp->dataLength == 2)) res =  rp->wordFromBytes(rp->dataBytes,0);
-	}	
+	}
 	delete rp;
-	
+
 	if (useSerialDebug) {
 		Serial.print("FPS - clearAllTemplate Result number deleted=");
 		Serial.print(res);
@@ -717,7 +717,7 @@ word FPS_CAMA::clearAllTemplate()
 		Serial.print(lastResultCode, HEX);
 		Serial.println();
 	}
-	
+
 	return res;
 }
 
@@ -725,7 +725,7 @@ word FPS_CAMA::clearAllTemplate()
   [Function]
      Get Empty ID
      Get the first template No. it can be used for storage fingerprint template
-  
+
   [Parameter]
   	 None
 
@@ -733,17 +733,17 @@ word FPS_CAMA::clearAllTemplate()
   	 first free template number or 0 on error
 
   [Operation Sequence]
-	Search the first number that can be used for storage fingerprint template, if all 
-	fingerprint data base is full,result= ERR_EMPTY_ID_NOEXIST; 
+	Search the first number that can be used for storage fingerprint template, if all
+	fingerprint data base is full,result= ERR_EMPTY_ID_NOEXIST;
 	else result=template No. that can be utilized
 */
 word FPS_CAMA::getEmptyId()
 {
 	word res = 0;
 	if (useSerialDebug) Serial.println("FPS - getEmptyId");
-	
+
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::GetEmptyId,0);
-	
+
 	byte* packetbytes = cp->getPacketBytes();
 	sendCommand(packetbytes, 24);
 	delete packetbytes;
@@ -751,14 +751,14 @@ word FPS_CAMA::getEmptyId()
 
 	Response_Packet* rp = getResponse(Command_Packet::Commands::GetEmptyId);
 
-	lastResultCode = NULL;
+	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
 		if ((! rp->isError) && (rp->dataLength == 2)) res =  rp->wordFromBytes(rp->dataBytes,0);
     		else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
-	}	
+	}
 	delete rp;
-	
+
 	if (useSerialDebug) {
 		Serial.print("FPS - getEmptyId Result first free=");
 		Serial.print(res);
@@ -766,14 +766,14 @@ word FPS_CAMA::getEmptyId()
 		Serial.print(lastResultCode, HEX);
 		Serial.println();
 	}
-	
+
 	return res;
 }
 
 
 
 /*
-// According to the DataSheet, this does nothing... 
+// According to the DataSheet, this does nothing...
 // Implemented it for completeness.
 void FPS_CAMA::Close()
 {
@@ -839,7 +839,7 @@ bool FPS_CAMA::ChangeBaudRate(int baud)
 		SendCommand(packetbytes, 12);
 		Response_Packet* rp = GetResponse();
 		bool retval = rp->ACK;
-		if (retval) 
+		if (retval)
 		{
 			_serial.end();
 			_serial.begin(baud);
@@ -922,7 +922,7 @@ int FPS_CAMA::EnrollStart(int id)
 }
 
 // Gets the first scan of an enrollment
-// Return: 
+// Return:
 //	0 - ACK
 //	1 - Enroll Failed
 //	2 - Bad finger
@@ -949,7 +949,7 @@ int FPS_CAMA::Enroll1()
 }
 
 // Gets the Second scan of an enrollment
-// Return: 
+// Return:
 //	0 - ACK
 //	1 - Enroll Failed
 //	2 - Bad finger
@@ -977,7 +977,7 @@ int FPS_CAMA::Enroll2()
 
 // Gets the Third scan of an enrollment
 // Finishes Enrollment
-// Return: 
+// Return:
 //	0 - ACK
 //	1 - Enroll Failed
 //	2 - Bad finger
@@ -1168,7 +1168,7 @@ bool FPS_CAMA::CaptureFinger(bool highquality)
 // Gets a template from the fps (498 bytes) in 4 Data_Packets
 // Use StartDataDownload, and then GetNextDataPacket until done
 // Parameter: 0-199 ID number
-// Returns: 
+// Returns:
 //	0 - ACK Download starting
 //	1 - Invalid position
 //	2 - ID not used (no template to download
@@ -1181,11 +1181,11 @@ bool FPS_CAMA::CaptureFinger(bool highquality)
 	//return false;
 //}
 
-// Uploads a template to the fps 
+// Uploads a template to the fps
 // Parameter: the template (498 bytes)
 // Parameter: the ID number to upload
 // Parameter: Check for duplicate fingerprints already on fps
-// Returns: 
+// Returns:
 //	0-199 - ID duplicated
 //	200 - Uploaded ok (no duplicate if enabled)
 //	201 - Invalid position
@@ -1209,7 +1209,7 @@ bool FPS_CAMA::CaptureFinger(bool highquality)
 	// may revisit this if I find a need for it
 //}
 
-// Returns the next data packet 
+// Returns the next data packet
 	// Not implemented due to memory restrictions on the arduino
 	// may revisit this if I find a need for it
 //Data_Packet GetNextDataPacket()
@@ -1238,7 +1238,7 @@ void FPS_CAMA::sendCommand(byte cmd[], int length)
 	_serial->write(cmd, length);
 	if (useSerialDebug)
 	{
-		Serial.print("FPS - SEND: "); 
+		Serial.print("FPS - SEND: ");
 		sendToSerial(cmd, length);
 		Serial.println();
 	}
@@ -1265,8 +1265,8 @@ Response_Packet* FPS_CAMA::getResponse(Command_Packet::Commands::Commands_Enum a
 		while (_serial->available() == false) delay(10);
 		resp[i]= (byte) _serial->read();
 	}
-	
-	if (useSerialDebug) 
+
+	if (useSerialDebug)
 	{
 		Serial.print("FPS - RECV: ");
 		sendToSerial(resp, 24);
@@ -1275,8 +1275,8 @@ Response_Packet* FPS_CAMA::getResponse(Command_Packet::Commands::Commands_Enum a
 
 	Response_Packet* rp = new Response_Packet(resp, awaitedResponseCode, useSerialDebug);
 	delete resp;
-	
-	if (useSerialDebug) 
+
+	if (useSerialDebug)
 	{
 		Serial.println("FPS - Response: ");
 		Serial.print("validResponse= ");
@@ -1312,12 +1312,11 @@ void FPS_CAMA::sendToSerial(byte data[], int length)
 void FPS_CAMA::serialPrintHex(byte data)
 {
   char tmp[16];
-  sprintf(tmp, "%.2X",data); 
-  Serial.print(tmp); 
+  sprintf(tmp, "%.2X",data);
+  Serial.print(tmp);
 }
 
 void FPS_CAMA::setUserActionCallback(FPSUserActionCallbackFunction callback)
 {
 	userActionCallback = callback;
 }
-

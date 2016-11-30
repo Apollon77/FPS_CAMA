@@ -1,4 +1,4 @@
-/* 
+/*
 	FPS_CAMA.h v1.0 - Library for controlling the CAMA Finger Print Scanner (FPS)
 	Created by Ingo Fischer, December 2015
 	Licensed for non-commercial use, must include this license message
@@ -9,10 +9,10 @@
 #ifndef FPS_CAMA_h
 #define FPS_CAMA_h
 
-#include "Arduino.h";
-#include "Stream.h";
+#include "Arduino.h"
+#include "Stream.h"
 /*
-	Command Packet is the instruction from Host to Target (CAMA-SM Series), 
+	Command Packet is the instruction from Host to Target (CAMA-SM Series),
 	Total length of the command packet is 24 Bytes
 */
 class Command_Packet
@@ -66,7 +66,7 @@ class Command_Packet
 
 		Commands::Commands_Enum command;
 		word dataLength;
-		byte commandData[16];								// Parameter up to 16 bytes, changes meaning depending on command							
+		byte commandData[16];								// Parameter up to 16 bytes, changes meaning depending on command
 		byte* getPacketBytes();								// returns the bytes to be transmitted
 		void addByteToCommandData(byte index, byte value);  // add a byte to CommandData array starting at Index index
 		void addWordToCommandData(byte index, word value);  // add a word to CommandData array starting at Index index
@@ -74,17 +74,17 @@ class Command_Packet
 
 		Command_Packet(Commands::Commands_Enum _command, word _dataLength);
 
-	private: 
+	private:
 		static const byte COMMAND_START_CODE_1 = 0x55;	// Static byte to mark the beginning of a command packet	-	never changes
 		static const byte COMMAND_START_CODE_2 = 0xAA;	// Static byte to mark the beginning of a command packet	-	never changes
 
 		word calculateChecksum(byte* data);						// Checksum is calculated using byte addition
-		byte getHighByte(word w);						
+		byte getHighByte(word w);
 		byte getLowByte(word w);
 };
 
 /*
-	Response packet is result of execute command packet, from Target (CAMA-SM Series) to Host, 
+	Response packet is result of execute command packet, from Target (CAMA-SM Series) to Host,
 	Total length of the command packet is 24 Bytes
 */
 class Response_Packet
@@ -109,8 +109,8 @@ class Response_Packet
 					ERR_BAD_QUALITY			= 0x21, // Bad quality fingerprint image.
 					ERR_TIME_OUT			= 0x23, // During Time Out period, no finger is detected
 					ERR_NOT_AUTHORIZED		= 0x24, // Not authorized by the password
-													// If set password, and not use Verify Device Password command, 
-													// then all commands would return error code expect 
+													// If set password, and not use Verify Device Password command,
+													// then all commands would return error code expect
 													// Test Connection, Verify Device Password;
 													// If no password, all commands are available without the password.
 					ERR_GENERALIZE			= 0x30, // Generalize template data fail
@@ -139,7 +139,7 @@ class Response_Packet
 
 					GD_TEMPLATE_NOT_EMPTY	= 0x01, // The appointed Template are not empty
 					GD_TEMPLATE_EMPTY		= 0x00, // The appointed Template have been emptied
-					
+
 					INVALID					= 0xFFFF
 				};
 
@@ -156,16 +156,16 @@ class Response_Packet
 		int intFromBytes(byte* buffer, byte index);
 		word wordFromBytes(byte* buffer, byte index);
 
-	private: 
+	private:
 		bool checkParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool useSerialDebug);
 		word calculateChecksum(byte* buffer, int length);
-		byte getHighByte(word w);						
+		byte getHighByte(word w);
 		byte getLowByte(word w);
 };
 
-#pragma region -= Command_Data_Packet =- 
+#pragma region -= Command_Data_Packet =-
 /*
-	When length of Command Parameter or Data is larger than 16 Bytes, 
+	When length of Command Parameter or Data is larger than 16 Bytes,
 	Utilize Data Packet to transmit block Data, the maximum length of Data Packet is 512Bytes
 */
 // Data Mule packet for receiving large data(in 128 byte pieces) from the FPS
@@ -194,17 +194,17 @@ class Command_Data_Packet
 		static const byte COMMAND_START_CODE_2 = 0x5A;	// Static byte to mark the beginning of a command packet	-	never changes
 		int IntFromParameter();
 
-	private: 
+	private:
 		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool UseSerialDebug);
 		word CalculateChecksum(byte* buffer, int length);
-		byte GetHighByte(word w);						
+		byte GetHighByte(word w);
 		byte GetLowByte(word w);
 };
 #pragma endregion
 
-#pragma region -= Response_Data_Packet =- 
+#pragma region -= Response_Data_Packet =-
 /*
-	When length of Command Parameter or Data is larger than 16 Bytes, 
+	When length of Command Parameter or Data is larger than 16 Bytes,
 	Utilize Data Packet to transmit block Data, the maximum length of Data Packet is 512Bytes
 */
 // Data Mule packet for receiving large data(in 128 byte pieces) from the FPS
@@ -230,10 +230,10 @@ class Response_Data_Packet
 		static const byte COMMAND_START_CODE_2 = 0x5A;	// Static byte to mark the beginning of a command packet	-	never changes
 		int IntFromParameter();
 
-	private: 
+	private:
 		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool UseSerialDebug);
 		word CalculateChecksum(byte* buffer, int length);
-		byte GetHighByte(word w);						
+		byte GetHighByte(word w);
 		byte GetLowByte(word w);
 };
 #pragma endregion
@@ -246,26 +246,26 @@ typedef bool(*FPSUserActionCallbackFunction)(const Command_Packet::Commands::Com
 */
 class FPS_CAMA
 {
- 
+
  public:
-	// Enables verbose debug output using hardware Serial 
+	// Enables verbose debug output using hardware Serial
 	bool useSerialDebug = false;
-	
+
 	// Last ResultCode
-	word lastResultCode = NULL;
+	word lastResultCode = 0xFFFF;
 
 	// Creates a new object to interface with the fingerprint scanner
 	FPS_CAMA(Stream& streamInstance);
-	
+
 	// [Function] One to one match
 	bool verify(word templateId);
 
 	// [Function] One to many match
 	word identify();
-	
+
 	// [Function] Enroll
 	bool enroll(word templateId);
-	
+
 	// [Function] Enroll one Time
 	bool enrollOneTime(word templateId);
 
@@ -289,7 +289,7 @@ class FPS_CAMA
 	// may revisit this if I find a need for it
 	//void StartDataDownload();
 
-	// Returns the next data packet 
+	// Returns the next data packet
 	// Not implemented due to memory restrictions on the arduino
 	// may revisit this if I find a need for it
 	//Data_Packet GetNextDataPacket();
@@ -304,4 +304,3 @@ private:
 };
 
 #endif
-
