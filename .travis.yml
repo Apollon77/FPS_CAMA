@@ -15,7 +15,7 @@ install:
   - ln -s $PWD /usr/local/share/arduino/libraries/FPS_CAMA
 
 script:
-#  - arduino --verify --board ${BOARD} $PWD/examples/MemStreamTest.ino
+  - arduino --verify --board ${BOARD} $PWD/examples/FPSTest/FPSTest.ino
 
 
 env:
