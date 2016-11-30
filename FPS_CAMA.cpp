@@ -227,7 +227,7 @@ byte Response_Packet::getLowByte(word w)
 
 // checks to see if the byte is the proper value, and logs it to the serial channel if not
 //DONE
-bool Response_Packet::checkParsing(byte b, byte propervalue, byte alternatevalue, String varname, bool useSerialDebug)
+bool Response_Packet::checkParsing(byte b, byte propervalue, byte alternatevalue, char const * varname, bool useSerialDebug)
 {
 	bool retval = (b != propervalue) && (b != alternatevalue);
 	if ((useSerialDebug) && (retval))
