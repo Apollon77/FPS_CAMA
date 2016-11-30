@@ -157,7 +157,7 @@ class Response_Packet
 		word wordFromBytes(byte* buffer, byte index);
 
 	private:
-		bool checkParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool useSerialDebug);
+		bool checkParsing(byte b, byte propervalue, byte alternatevalue, char const * varname, bool useSerialDebug);
 		word calculateChecksum(byte* buffer, int length);
 		byte getHighByte(word w);
 		byte getLowByte(word w);
@@ -195,7 +195,7 @@ class Command_Data_Packet
 		int IntFromParameter();
 
 	private:
-		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool UseSerialDebug);
+		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char const * varname, bool UseSerialDebug);
 		word CalculateChecksum(byte* buffer, int length);
 		byte GetHighByte(word w);
 		byte GetLowByte(word w);
@@ -231,7 +231,7 @@ class Response_Data_Packet
 		int IntFromParameter();
 
 	private:
-		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool UseSerialDebug);
+		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char const * varname, bool UseSerialDebug);
 		word CalculateChecksum(byte* buffer, int length);
 		byte GetHighByte(word w);
 		byte GetLowByte(word w);
