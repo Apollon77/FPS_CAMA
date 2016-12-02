@@ -10,12 +10,15 @@ before_install:
   - tar xf arduino-${ARDUINO_IDE_VERSION}-linux64.tar.xz
   - sudo mv arduino-${ARDUINO_IDE_VERSION} /usr/local/share/arduino
   - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
+  - git clone --depth=50 --branch=master https://github.com/Apollon77/MemStream.git Apollon77/MemStream
 
 install:
   - ln -s $PWD /usr/local/share/arduino/libraries/FPS_CAMA
+  - ln -s $PWD/../MemStream /usr/local/share/arduino/libraries/MemStream
 
 script:
-  - arduino --verify --board ${BOARD} $PWD/examples/FPSTest/FPSTest.ino
+  - arduino --verify --board ${BOARD} $PWD/examples/FPSIncludeTest/FPSIncludeTest.ino
+  - arduino --verify --board ${BOARD} $PWD/examples/FPS_CAMA_Tests/FPS_CAMA_Tests.ino
 
 
 env:
