@@ -10,7 +10,7 @@ before_install:
   - tar xf arduino-${ARDUINO_IDE_VERSION}-linux64.tar.xz
   - sudo mv arduino-${ARDUINO_IDE_VERSION} /usr/local/share/arduino
   - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
-  - git clone --depth=50 --branch=master https://github.com/Apollon77/MemStream.git Apollon77/MemStream
+  - git clone --depth=50 --branch=master https://github.com/Apollon77/MemStream.git ../MemStream
   - cd ../MemStream
   - git checkout
   - cd ../FPS_CAMA
