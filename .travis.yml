@@ -11,6 +11,9 @@ before_install:
   - sudo mv arduino-${ARDUINO_IDE_VERSION} /usr/local/share/arduino
   - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
   - git clone --depth=50 --branch=master https://github.com/Apollon77/MemStream.git Apollon77/MemStream
+  - cd ../MemStream
+  - git checkout
+  - cd ../FPS_CAMA
 
 install:
   - ln -s $PWD /usr/local/share/arduino/libraries/FPS_CAMA
