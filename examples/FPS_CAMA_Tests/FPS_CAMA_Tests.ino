@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 #include <FPS_CAMA.h>
 #include <MemStream.h>
 
