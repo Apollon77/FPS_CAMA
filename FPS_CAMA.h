@@ -60,7 +60,8 @@ class Command_Packet
 					GetEnrollCount							= 0x0128,
 					FPCancel								= 0x0130,
 					TestConnection							= 0x0150,
-					IncorrectCommandResponse				= 0x0160
+					IncorrectCommandResponse				= 0x0160,
+                    NoDetection                             = 0xFFFF
 			};
 		};
 
@@ -157,13 +158,13 @@ class Response_Packet
 		word wordFromBytes(byte* buffer, byte index);
 
 	private:
-		bool checkParsing(byte b, byte propervalue, byte alternatevalue, char const * varname, bool useSerialDebug);
+		bool checkParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool useSerialDebug);
 		word calculateChecksum(byte* buffer, int length);
 		byte getHighByte(word w);
 		byte getLowByte(word w);
 };
 
-#pragma region -= Command_Data_Packet =-
+//#pragma region -= Command_Data_Packet =-
 /*
 	When length of Command Parameter or Data is larger than 16 Bytes,
 	Utilize Data Packet to transmit block Data, the maximum length of Data Packet is 512Bytes
@@ -195,14 +196,14 @@ class Command_Data_Packet
 		int IntFromParameter();
 
 	private:
-		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char const * varname, bool UseSerialDebug);
+		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool UseSerialDebug);
 		word CalculateChecksum(byte* buffer, int length);
 		byte GetHighByte(word w);
 		byte GetLowByte(word w);
 };
-#pragma endregion
+//#pragma endregion
 
-#pragma region -= Response_Data_Packet =-
+//#pragma region -= Response_Data_Packet =-
 /*
 	When length of Command Parameter or Data is larger than 16 Bytes,
 	Utilize Data Packet to transmit block Data, the maximum length of Data Packet is 512Bytes
@@ -231,12 +232,12 @@ class Response_Data_Packet
 		int IntFromParameter();
 
 	private:
-		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char const * varname, bool UseSerialDebug);
+		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool UseSerialDebug);
 		word CalculateChecksum(byte* buffer, int length);
 		byte GetHighByte(word w);
 		byte GetLowByte(word w);
 };
-#pragma endregion
+//#pragma endregion
 
 
 typedef bool(*FPSUserActionCallbackFunction)(const Command_Packet::Commands::Commands_Enum command, const Response_Packet::ResultCodes::ResultCodes_Enum action);
@@ -248,14 +249,21 @@ class FPS_CAMA
 {
 
  public:
-	// Enables verbose debug output using hardware Serial
-	bool useSerialDebug = false;
+     // Enables verbose debug output using hardware Serial
+ 	bool useSerialDebug = false;
+
+    // Timeout for serial read in ms, should be higher then the Finger-Timeout because else it may produce problems
+	word serialTimeout = 6000;
 
 	// Last ResultCode
 	word lastResultCode = 0xFFFF;
 
 	// Creates a new object to interface with the fingerprint scanner
 	FPS_CAMA(Stream& streamInstance);
+
+    void setSerialTimeout(word timeout);
+
+    Response_Packet* readAvailableResponse();
 
 	// [Function] One to one match
 	bool verify(word templateId);
@@ -278,7 +286,60 @@ class FPS_CAMA
 	// [Function] Get Empty Id
 	word getEmptyId();
 
+    // [Function] Get Template Status
+	bool getTemplateStatus(word templateId);
 
+    // [Function] Get Broken Template
+	word getBrokenTemplate();
+
+    // [Function] Set Security Level
+	bool setSecurityLevel(word securityLevel);
+
+    // [Function] Get Security Level
+	word getSecurityLevel();
+
+    // [Function] Set Finger Timeout
+	bool setFingerTimeout(word fingerTimeout);
+
+    // [Function] Get Finger Timeout
+	word getFingerTimeout();
+
+    // [Function] Set Device Id
+	bool setDeviceId(word deviceId);
+
+    // [Function] Get Device Id
+	word getDeviceId();
+
+    // [Function] Get F/W Version
+	word getFirmwareVersion();
+
+    // [Function] Finger Detect
+	bool fingerDetect();
+
+    // [Function] Set Baudrate
+	bool setBaudrate(word baudrate);
+
+    // [Function] Set Duplication Check(ON/OFF)
+	bool setDuplicationCheck(bool duplicationCheck);
+
+    // [Function] Get Duplication Check
+	bool getDuplicationCheck();
+
+    // [Function] Enter Standby Mode
+	bool standbyMode();
+
+    // [Function] Sensor LED Control
+	bool setSensorLed(bool ledEnabled);
+
+    // [Function] Get Enroll Count
+	word getEnrollCount();
+
+    // [Function] FP Cancel
+    void sendFPCancel();
+    bool getFPCancelResult();
+
+    // [Function] Test Connection
+	bool testConnection();
 
 
 	void serialPrintHex(byte data);
