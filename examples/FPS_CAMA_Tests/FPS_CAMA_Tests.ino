@@ -1,3 +1,9 @@
+/*
+	FPS_CAMA_Tests.ino - Library example for controlling the CAMA Finger Print Scanner (FPS)
+	Created by Ingo Fischer, August 02rd 2017
+
+	This sketch acts as unit tests and execute all library functions against simulated results
+*/
 #include <FPS_CAMA.h>
 #include <MemStream.h>
 
@@ -638,7 +644,7 @@ bool testStandbyMode() {
   testsOk &= (cama.standbyMode() == true);
   testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
-  
+
   return testsOk;
 }
 
@@ -736,7 +742,7 @@ bool testTestConnection() {
     0xAA, 0x55, 0x50, 0x01, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x54, 0x01
   };
   testStream.setBufferContent(buf_TestConnectionSuccess,24);
-  testsOk &= (cama.testConnection() == 1);
+  testsOk &= (cama.testConnection(false) == 1);
   testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
@@ -746,7 +752,7 @@ bool testTestConnection() {
     0xAA, 0x55, 0x50, 0x01, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x53, 0x01
   };
   testStream.setBufferContent(buf_TestConnectionFail,24);
-  testsOk &= (cama.testConnection() == 0);
+  testsOk &= (cama.testConnection(false) == 0);
   testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_FAIL);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 

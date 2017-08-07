@@ -149,8 +149,8 @@ class Response_Packet
 		Response_Packet(byte* buffer, word awaitedResponseCode, bool useSerialDebug);
 		ResultCodes::ResultCodes_Enum resultCode;
 		bool isError;
-		static const byte COMMAND_START_CODE_1 = 0xAA;	// Static byte to mark the beginning of a command packet	-	never changes
-		static const byte COMMAND_START_CODE_2 = 0x55;	// Static byte to mark the beginning of a command packet	-	never changes
+		static const byte RESPONSE_START_CODE_1 = 0xAA;	// Static byte to mark the beginning of a command packet	-	never changes
+		static const byte RESPONSE_START_CODE_2 = 0x55;	// Static byte to mark the beginning of a command packet	-	never changes
 		word dataLength;
 		byte dataBytes[14];
 		bool validResponse;
@@ -227,8 +227,8 @@ class Response_Data_Packet
 	public:
 		Response_Data_Packet(byte* buffer, bool UseSerialDebug);
 		byte RawBytes[24];
-		static const byte COMMAND_START_CODE_1 = 0xA5;	// Static byte to mark the beginning of a command packet	-	never changes
-		static const byte COMMAND_START_CODE_2 = 0x5A;	// Static byte to mark the beginning of a command packet	-	never changes
+		static const byte RESPONSE_START_CODE_1 = 0xA5;	// Static byte to mark the beginning of a command packet	-	never changes
+		static const byte RESPONSE_START_CODE_2 = 0x5A;	// Static byte to mark the beginning of a command packet	-	never changes
 		int IntFromParameter();
 
 	private:
@@ -339,7 +339,7 @@ class FPS_CAMA
     bool getFPCancelResult();
 
     // [Function] Test Connection
-	bool testConnection();
+	bool testConnection(bool retry);
 
 
 	void serialPrintHex(byte data);

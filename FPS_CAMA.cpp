@@ -101,8 +101,8 @@ Response_Packet::Response_Packet(byte* buffer, word awaitedResponseCode, bool us
     memset(dataBytes, 0, sizeof(dataBytes)); // Clear DataBytes Array
     if (buffer != NULL) {
         validResponse = true;
-    	validResponse &= checkParsing(buffer[0], COMMAND_START_CODE_1, COMMAND_START_CODE_1, (char *)"COMMAND_START_CODE_1", useSerialDebug);
-    	validResponse &= checkParsing(buffer[1], COMMAND_START_CODE_2, COMMAND_START_CODE_2, (char *)"COMMAND_START_CODE_2", useSerialDebug);
+    	validResponse &= checkParsing(buffer[0], RESPONSE_START_CODE_1, RESPONSE_START_CODE_1, (char *)"RESPONSE_START_CODE_1", useSerialDebug);
+    	validResponse &= checkParsing(buffer[1], RESPONSE_START_CODE_2, RESPONSE_START_CODE_2, (char *)"RESPONSE_START_CODE_2", useSerialDebug);
 
     	word checksum = calculateChecksum(buffer, 22);
     	byte checksum_low = getLowByte(checksum);
@@ -326,7 +326,7 @@ bool FPS_CAMA::verify(word templateId)
 				lastResultCode = 0xFFFF;
 				if (rp2->validResponse) {
 					if (rp2->dataLength > 0) lastResultCode = rp2->resultCode;
-					if ((! rp2->isError) && (rp2->dataLength == 2)) {
+					if ((! rp2->isError) && (rp2->dataLength > 0)) {
 						if (rp2->wordFromBytes(rp2->dataBytes,0) == templateId) res=true;
 						  else lastResultCode=Response_Packet::ResultCodes::ERR_FAIL;
 					}
@@ -342,7 +342,9 @@ bool FPS_CAMA::verify(word templateId)
 	delete rp1;
 
 	if (useSerialDebug) {
-		Serial.print("FPS - verify Result=");
+		Serial.print("FPS - verify Result for templateId ");
+        Serial.print(templateId);
+        Serial.print("=");
 		Serial.print(res);
 		Serial.print(", lastResultCode=0x");
 		Serial.print(lastResultCode, HEX);
@@ -406,7 +408,7 @@ word FPS_CAMA::identify()
 				lastResultCode = 0xFFFF;
 				if (rp2->validResponse) {
 					if (rp2->dataLength > 0) lastResultCode = rp2->resultCode;
-					if ((! rp2->isError) && (rp2->dataLength == 2)) {
+					if ((! rp2->isError) && (rp2->dataLength > 0)) {
 						res=rp2->wordFromBytes(rp2->dataBytes,0);
 					}
                     else lastResultCode = rp2->wordFromBytes(rp2->dataBytes,0);
@@ -499,7 +501,7 @@ bool FPS_CAMA::enroll(word templateId)
 			if (! rp->isError) {
 				if ((awaitFinalResponse) && (lastResultCode != Response_Packet::ResultCodes::GD_NEED_RELEASE_FINGER)) {
 					if (rp->dataLength > 0) lastResultCode = rp->resultCode;
-					if ((! rp->isError) && (rp->dataLength == 2)) {
+					if ((! rp->isError) && (rp->dataLength > 0)) {
 						if (rp->wordFromBytes(rp->dataBytes,0) == templateId) res=true;
 							else lastResultCode=Response_Packet::ResultCodes::ERR_VERIFY;
 					}
@@ -560,8 +562,10 @@ bool FPS_CAMA::enroll(word templateId)
     }
 
 	if (useSerialDebug) {
-		Serial.print("FPS - enroll Result templateId=");
-		Serial.print(res);
+		Serial.print("FPS - enroll Result for templateId ");
+        Serial.print(templateId);
+        Serial.print("=");
+        Serial.print(res);
 		Serial.print(", lastResultCode=0x");
 		Serial.print(lastResultCode, HEX);
 		Serial.println();
@@ -628,7 +632,7 @@ bool FPS_CAMA::enrollOneTime(word templateId)
 				lastResultCode = 0xFFFF;
 				if (rp2->validResponse) {
 					if (rp2->dataLength > 0) lastResultCode = rp2->resultCode;
-					if ((! rp2->isError) && (rp2->dataLength == 2)) {
+					if ((! rp2->isError) && (rp2->dataLength > 0)) {
 						if (rp2->wordFromBytes(rp2->dataBytes,0) == templateId) res=true;
 						  else lastResultCode=Response_Packet::ResultCodes::ERR_FAIL;
 					}
@@ -644,7 +648,9 @@ bool FPS_CAMA::enrollOneTime(word templateId)
 	delete rp1;
 
 	if (useSerialDebug) {
-		Serial.print("FPS - enrollOneTime Result=");
+		Serial.print("FPS - enrollOneTime Result for templateId ");
+        Serial.print(templateId);
+        Serial.print("=");
 		Serial.print(res);
 		Serial.print(", lastResultCode=0x");
 		Serial.print(lastResultCode, HEX);
@@ -689,7 +695,7 @@ bool FPS_CAMA::clearTemplate(word templateId)
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		if (rp->dataLength > 0) lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
 			if (rp->wordFromBytes(rp->dataBytes,0) == templateId) res=true;
 				else lastResultCode=Response_Packet::ResultCodes::ERR_FAIL;
 		}
@@ -737,7 +743,7 @@ word FPS_CAMA::clearAllTemplate()
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) res =  rp->wordFromBytes(rp->dataBytes,0);
+		if ((! rp->isError) && (rp->dataLength > 0)) res =  rp->wordFromBytes(rp->dataBytes,0);
             else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
 	}
 	delete rp;
@@ -786,7 +792,7 @@ word FPS_CAMA::getEmptyId()
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) res =  rp->wordFromBytes(rp->dataBytes,0);
+		if ((! rp->isError) && (rp->dataLength > 0)) res =  rp->wordFromBytes(rp->dataBytes,0);
     		else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
 	}
 	delete rp;
@@ -835,7 +841,7 @@ bool FPS_CAMA::getTemplateStatus(word templateId)
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		if (rp->dataLength > 0) lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
             if (lastResultCode == Response_Packet::ResultCodes::GD_TEMPLATE_EMPTY) res=true;
 		}
@@ -889,7 +895,7 @@ word FPS_CAMA::getBrokenTemplate()
     word brokenCount = 0;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 4)) {
+		if ((! rp->isError) && (rp->dataLength >= 4)) {
             brokenCount = rp->wordFromBytes(rp->dataBytes,0);
             if (brokenCount > 0) res =  rp->wordFromBytes(rp->dataBytes,2);
         }
@@ -944,7 +950,7 @@ bool FPS_CAMA::setSecurityLevel(word securityLevel)
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		if (rp->dataLength > 0) lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             if (rp->wordFromBytes(rp->dataBytes,0) == securityLevel) res = true;
 		}
 		else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
@@ -993,7 +999,7 @@ word FPS_CAMA::getSecurityLevel()
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             res =  rp->wordFromBytes(rp->dataBytes,0);
         }
 	}
@@ -1047,7 +1053,7 @@ bool FPS_CAMA::setFingerTimeout(word fingerTimeout)
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		if (rp->dataLength > 0) lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             if (rp->wordFromBytes(rp->dataBytes,0) == fingerTimeout) res = true;
 		}
 		else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
@@ -1096,7 +1102,7 @@ word FPS_CAMA::getFingerTimeout()
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             res = rp->wordFromBytes(rp->dataBytes,0);
         }
 	}
@@ -1146,7 +1152,7 @@ bool FPS_CAMA::setDeviceId(word deviceId)
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		if (rp->dataLength > 0) lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             if (rp->wordFromBytes(rp->dataBytes,0) == deviceId) res = true;
 		}
 		else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
@@ -1195,7 +1201,7 @@ word FPS_CAMA::getDeviceId()
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             res = rp->wordFromBytes(rp->dataBytes,0);
         }
         else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
@@ -1244,7 +1250,7 @@ word FPS_CAMA::getFirmwareVersion()
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             res = rp->wordFromBytes(rp->dataBytes,0);
         }
 	}
@@ -1295,7 +1301,7 @@ bool FPS_CAMA::fingerDetect()
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             res = (rp->wordFromBytes(rp->dataBytes,0) == 1);
         }
 	}
@@ -1349,7 +1355,7 @@ bool FPS_CAMA::setBaudrate(word baudrate)
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		if (rp->dataLength > 0) lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             if (rp->wordFromBytes(rp->dataBytes,0) == baudrate) res = true;
 		}
 		else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
@@ -1400,7 +1406,7 @@ bool FPS_CAMA::setDuplicationCheck(bool duplicationCheck)
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		if (rp->dataLength > 0) lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             if ((rp->wordFromBytes(rp->dataBytes,0) == 1 ? true : false) == duplicationCheck) res = true;
 		}
 		else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
@@ -1449,7 +1455,7 @@ bool FPS_CAMA::getDuplicationCheck()
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             res = (rp->wordFromBytes(rp->dataBytes,0) == 1);
         }
 	}
@@ -1598,7 +1604,7 @@ word FPS_CAMA::getEnrollCount()
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 2)) {
+		if ((! rp->isError) && (rp->dataLength > 0)) {
             res = rp->wordFromBytes(rp->dataBytes,0);
         }
         else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
@@ -1703,36 +1709,57 @@ bool FPS_CAMA::getFPCancelResult()
 
   [Operation Sequence]
 */
-bool FPS_CAMA::testConnection()
+bool FPS_CAMA::testConnection(bool retry)
 {
-	bool res = false;
+    byte retryCount=3;
+    bool res = false;
 	if (useSerialDebug) Serial.println("FPS - testConnection");
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::TestConnection,0);
 
 	byte* packetbytes = cp->getPacketBytes();
-	sendCommand(packetbytes, 24);
-	delete packetbytes;
-	delete cp;
+    bool done = false;
+    for (byte i=0;i<retryCount;i++) {
+    	sendCommand(packetbytes, 24);
 
-	Response_Packet* rp = getResponse(Command_Packet::Commands::TestConnection);
+    	Response_Packet* rp = getResponse(Command_Packet::Commands::TestConnection);
 
-	lastResultCode = 0xFFFF;
-	if (rp->validResponse) {
-		lastResultCode = rp->resultCode;
-		if (! rp->isError) {
-            res = true;
+    	lastResultCode = 0xFFFF;
+    	if (rp->validResponse) {
+    		lastResultCode = rp->resultCode;
+    		if (! rp->isError) {
+                res = true;
+            }
+            done=true;
+    	}
+        else if (retry) {
+            done = false;
+            if (useSerialDebug) {
+                Serial.print("Response invalid - read one more response if data is there and try again (");
+                Serial.print(i);
+                Serial.println(")");
+            }
+            // we read what's there and then try again incl. request
+            Response_Packet* rp2 = readAvailableResponse();
+            delete rp2;
+            continue;
         }
-	}
-	delete rp;
+        else {
+            done=true;
+        }
+    	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - testConnection Result =");
-		Serial.print(res);
-        Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
-	}
+    	if (useSerialDebug) {
+    		Serial.print("FPS - testConnection Result =");
+    		Serial.print(res);
+            Serial.print(", lastResultCode=0x");
+    		Serial.print(lastResultCode, HEX);
+    		Serial.println();
+    	}
+        if (done) break;
+    }
+    delete packetbytes;
+    delete cp;
 
 	return res;
 }
@@ -1760,8 +1787,9 @@ Response_Packet* FPS_CAMA::getResponse(Command_Packet::Commands::Commands_Enum a
     byte* resp = new byte[24];
 	while (done == false)
 	{
+        while ((_serial->available() == false) && (millis()<=timeoutTime)) delay(50);
 		firstbyte = (byte)_serial->read();
-		if (firstbyte == Response_Packet::COMMAND_START_CODE_1)
+		if (firstbyte == Response_Packet::RESPONSE_START_CODE_1)
 		{
 			done = true;
 		}
@@ -1771,7 +1799,7 @@ Response_Packet* FPS_CAMA::getResponse(Command_Packet::Commands::Commands_Enum a
         resp[0] = firstbyte;
     	for (int i=1; i < 24; i++)
     	{
-    		while ((_serial->available() == false) && (millis()<=timeoutTime)) delay(10);
+    		while ((_serial->available() == false) && (millis()<=timeoutTime)) delay(50);
             if (millis()>timeoutTime) {
                 done = false;
                 break;
@@ -1822,7 +1850,7 @@ Response_Packet* FPS_CAMA::readAvailableResponse()
 	while ((done == false) || (!_serial->available()))
 	{
 		firstbyte = (byte)_serial->read();
-		if (firstbyte == Response_Packet::COMMAND_START_CODE_1)
+		if (firstbyte == Response_Packet::RESPONSE_START_CODE_1)
 		{
 			done = true;
 		}
