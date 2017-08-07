@@ -267,11 +267,33 @@ FPS_CAMA::FPS_CAMA(Stream& streamInstance)
   // nothing to do
 };
 
+void FPS_CAMA::setSerialDebug(bool debug) {
+    useSerialDebug = debug;
+}
+
+bool FPS_CAMA::setSerialDebug() {
+    return useSerialDebug;
+}
+
+// getLastResultCode
+word FPS_CAMA::getLastResultCode()
+{
+  return lastResultCode;
+};
+
 // SetSerialTimeout
 void FPS_CAMA::setSerialTimeout(word timeout)
 {
   serialTimeout = timeout;
 };
+
+// SetSerialTimeout
+word FPS_CAMA::getSerialTimeout()
+{
+  return serialTimeout;
+};
+
+
 /*
   [Function]
      One to one match

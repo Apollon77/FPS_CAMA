@@ -46,7 +46,7 @@ bool testVerify() {
   };
   testStream.setBufferContent(buf_VerifySuccess,48);
   testsOk &= (cama.verify(1) == 1);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -56,7 +56,7 @@ bool testVerify() {
   };
   testStream.setBufferContent(buf_VerifyError,24);
   testsOk &= (cama.verify(1) == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_INVALID_TMPL_NO);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_INVALID_TMPL_NO);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -67,7 +67,7 @@ bool testVerify() {
   };
   testStream.setBufferContent(buf_VerifyErrorInvTmplId,48);
   testsOk &= (cama.verify(1) == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_FAIL);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_FAIL);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -84,7 +84,7 @@ bool testIdentify() {
   };
   testStream.setBufferContent(buf_IdentifySuccess,48);
   testsOk &= (cama.identify() == 2);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -94,7 +94,7 @@ bool testIdentify() {
   };
   testStream.setBufferContent(buf_IdentifyError,24);
   testsOk &= (cama.identify() == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_ALL_TMPL_EMPTY);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_ALL_TMPL_EMPTY);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -116,7 +116,7 @@ bool testEnroll() {
   };
   testStream.setBufferContent(buf_EnrollSuccess,336);
   testsOk &= (cama.enroll(3) == 1);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -132,7 +132,7 @@ bool testEnroll() {
   };
   testStream.setBufferContent(buf_EnrollError,336);
   testsOk &= (cama.enroll(3) == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_GENERALIZE);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_GENERALIZE);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -142,7 +142,7 @@ bool testEnroll() {
   };
   testStream.setBufferContent(buf_EnrollErrorInvTmplId,24);
   testsOk &= (cama.enroll(3) == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_INVALID_TMPL_NO);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_INVALID_TMPL_NO);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -159,7 +159,7 @@ bool testEnrollOneTime() {
   };
   testStream.setBufferContent(buf_EnrollOneTimeSuccess,48);
   testsOk &= (cama.enrollOneTime(4) == 1);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -169,7 +169,7 @@ bool testEnrollOneTime() {
   };
   testStream.setBufferContent(buf_EnrollOneTimeError,24);
   testsOk &= (cama.enrollOneTime(4) == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_INVALID_TMPL_NO);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_INVALID_TMPL_NO);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -180,7 +180,7 @@ bool testEnrollOneTime() {
   };
   testStream.setBufferContent(buf_EnrollOneTimeErrorInvTmplId,48);
   testsOk &= (cama.enrollOneTime(4) == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_FAIL);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_FAIL);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -196,7 +196,7 @@ bool testClearTemplate() {
   };
   testStream.setBufferContent(buf_ClearTemplateSuccess,24);
   testsOk &= (cama.clearTemplate(1) == 1);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -206,7 +206,7 @@ bool testClearTemplate() {
   };
   testStream.setBufferContent(buf_ClearTemplateError,24);
   testsOk &= (cama.clearTemplate(1) == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_INVALID_TMPL_NO);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_INVALID_TMPL_NO);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -222,7 +222,7 @@ bool testClearAllTemplate() {
   };
   testStream.setBufferContent(buf_ClearAllTemplateSuccess,24);
   testsOk &= (cama.clearAllTemplate() == 5);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -232,7 +232,7 @@ bool testClearAllTemplate() {
   };
   testStream.setBufferContent(buf_ClearAllTemplateError,24);
   testsOk &= (cama.clearAllTemplate() == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_EXCEPTION);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_EXCEPTION);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -248,7 +248,7 @@ bool testGetEmptyId() {
   };
   testStream.setBufferContent(buf_GetEmptyIdSuccess,24);
   testsOk &= (cama.getEmptyId() == 2);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -258,7 +258,7 @@ bool testGetEmptyId() {
   };
   testStream.setBufferContent(buf_GetEmptyIdError,24);
   testsOk &= (cama.getEmptyId() == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_EMPTY_ID_NOEXIST);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_EMPTY_ID_NOEXIST);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -274,7 +274,7 @@ bool testGetTemplateStatus() {
   };
   testStream.setBufferContent(buf_GetTemplateStatusUsedSuccess,24);
   testsOk &= (cama.getTemplateStatus(1) == false);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::GD_TEMPLATE_NOT_EMPTY);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::GD_TEMPLATE_NOT_EMPTY);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -284,7 +284,7 @@ bool testGetTemplateStatus() {
   };
   testStream.setBufferContent(buf_GetTemplateStatusFreeSuccess,24);
   testsOk &= (cama.getTemplateStatus(1) == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::GD_TEMPLATE_EMPTY);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::GD_TEMPLATE_EMPTY);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -294,7 +294,7 @@ bool testGetTemplateStatus() {
   };
   testStream.setBufferContent(buf_GetTemplateStatusError,24);
   testsOk &= (cama.getTemplateStatus(1) == false);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_INVALID_TMPL_NO);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_INVALID_TMPL_NO);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -310,7 +310,7 @@ bool testGetBrokenTemplate() {
   };
   testStream.setBufferContent(buf_GetBrokenTemplateSuccess,24);
   testsOk &= (cama.getBrokenTemplate() == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -320,7 +320,7 @@ bool testGetBrokenTemplate() {
   };
   testStream.setBufferContent(buf_GetBrokenTemplateSuccess2,24);
   testsOk &= (cama.getBrokenTemplate() == 3);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -330,7 +330,7 @@ bool testGetBrokenTemplate() {
   };
   testStream.setBufferContent(buf_GetBrokenTemplateError,24);
   testsOk &= (cama.getBrokenTemplate() == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_NOT_AUTHORIZED);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_NOT_AUTHORIZED);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -346,7 +346,7 @@ bool testSetSecurityLevel() {
   };
   testStream.setBufferContent(buf_SetSecurityLevelSuccess,24);
   testsOk &= (cama.setSecurityLevel(3) == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -356,7 +356,7 @@ bool testSetSecurityLevel() {
   };
   testStream.setBufferContent(buf_SetSecurityLevelError,24);
   testsOk &= (cama.setSecurityLevel(6) == false);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_INVALID_SEC_VAL);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_INVALID_SEC_VAL);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -372,7 +372,7 @@ bool testGetSecurityLevel() {
   };
   testStream.setBufferContent(buf_GetSecurityLevelSuccess,24);
   testsOk &= (cama.getSecurityLevel() == 3);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -382,7 +382,7 @@ bool testGetSecurityLevel() {
   };
   testStream.setBufferContent(buf_GetSecurityLevelError,24);
   testsOk &= (cama.getSecurityLevel() == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_FAIL);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_FAIL);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -398,7 +398,7 @@ bool testSetFingerTimeout() {
   };
   testStream.setBufferContent(buf_SetFingerTimeoutSuccess,24);
   testsOk &= (cama.setFingerTimeout(10) == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -408,7 +408,7 @@ bool testSetFingerTimeout() {
   };
   testStream.setBufferContent(buf_SetFingerTimeoutError,24);
   testsOk &= (cama.setFingerTimeout(61) == false);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_INVALID_TIME_OUT);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_INVALID_TIME_OUT);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -424,7 +424,7 @@ bool testGetFingerTimeout() {
   };
   testStream.setBufferContent(buf_GetFingerTimeoutSuccess,24);
   testsOk &= (cama.getFingerTimeout() == 5);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -434,7 +434,7 @@ bool testGetFingerTimeout() {
   };
   testStream.setBufferContent(buf_GetFingerTimeoutError,24);
   testsOk &= (cama.getFingerTimeout() == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_FAIL);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_FAIL);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -450,7 +450,7 @@ bool testSetDeviceId() {
   };
   testStream.setBufferContent(buf_SetDeviceIdSuccess,24);
   testsOk &= (cama.setDeviceId(10) == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -460,7 +460,7 @@ bool testSetDeviceId() {
   };
   testStream.setBufferContent(buf_SetDeviceIdError,24);
   testsOk &= (cama.setDeviceId(266) == false);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_INVALID_PARAM);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_INVALID_PARAM);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -476,7 +476,7 @@ bool testGetDeviceId() {
   };
   testStream.setBufferContent(buf_GetDeviceIdSuccess,24);
   testsOk &= (cama.getDeviceId() == 5);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -486,7 +486,7 @@ bool testGetDeviceId() {
   };
   testStream.setBufferContent(buf_GetDeviceIdError,24);
   testsOk &= (cama.getDeviceId() == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_EXCEPTION);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_EXCEPTION);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -502,7 +502,7 @@ bool testGetFirmwareVersion() {
   };
   testStream.setBufferContent(buf_GetFirmwareVersionSuccess,24);
   testsOk &= (cama.getFirmwareVersion() == 0x0902);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -518,7 +518,7 @@ bool testFingerDetect() {
   };
   testStream.setBufferContent(buf_FingerDetectSuccessTrue,24);
   testsOk &= (cama.fingerDetect() == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -528,7 +528,7 @@ bool testFingerDetect() {
   };
   testStream.setBufferContent(buf_FingerDetectSuccessFalse,24);
   testsOk &= (cama.fingerDetect() == false);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -544,7 +544,7 @@ bool testSetBaudrate() {
   };
   testStream.setBufferContent(buf_SetBaudrateSuccess,24);
   testsOk &= (cama.setBaudrate(1) == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -554,7 +554,7 @@ bool testSetBaudrate() {
   };
   testStream.setBufferContent(buf_SetBaudrateError,24);
   testsOk &= (cama.setBaudrate(7) == false);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_INVALID_BAUDRATE);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_INVALID_BAUDRATE);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -570,7 +570,7 @@ bool testSetDuplicationCheck() {
   };
   testStream.setBufferContent(buf_SetDuplicationCheckSuccess,24);
   testsOk &= (cama.setDuplicationCheck(true) == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -580,7 +580,7 @@ bool testSetDuplicationCheck() {
   };
   testStream.setBufferContent(buf_SetDuplicationCheckSuccess2,24);
   testsOk &= (cama.setDuplicationCheck(false) == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -590,7 +590,7 @@ bool testSetDuplicationCheck() {
   };
   testStream.setBufferContent(buf_SetDuplicationCheckError,24);
   testsOk &= (cama.setDuplicationCheck(false) == false);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_INVALID_DUP_VAL);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_INVALID_DUP_VAL);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -606,7 +606,7 @@ bool testGetDuplicationCheck() {
   };
   testStream.setBufferContent(buf_GetDuplicationCheckTrueSuccess,24);
   testsOk &= (cama.getDuplicationCheck() == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -616,7 +616,7 @@ bool testGetDuplicationCheck() {
   };
   testStream.setBufferContent(buf_GetDuplicationCheckFalseSuccess,24);
   testsOk &= (cama.getDuplicationCheck() == false);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -626,7 +626,7 @@ bool testGetDuplicationCheck() {
   };
   testStream.setBufferContent(buf_GetDuplicationCheckError,24);
   testsOk &= (cama.getDuplicationCheck() == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_FAIL);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_FAIL);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -642,7 +642,7 @@ bool testStandbyMode() {
   };
   testStream.setBufferContent(buf_StandbyModeSuccess,24);
   testsOk &= (cama.standbyMode() == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -658,7 +658,7 @@ bool testSetSensorLed() {
   };
   testStream.setBufferContent(buf_SetSensorLedTrueSuccess,24);
   testsOk &= (cama.setSensorLed(true) == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -674,7 +674,7 @@ bool testGetEnrollCount() {
   };
   testStream.setBufferContent(buf_GetEnrollCountSuccess,24);
   testsOk &= (cama.getEnrollCount() == 1);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -690,7 +690,7 @@ bool testGetEnrollCountTimeout() {
   };
   testStream.setBufferContent(buf_GetEnrollCountSuccess,23);
   testsOk &= (cama.getEnrollCount() == 0);
-  testsOk &= (cama.lastResultCode == 0xFFFF);
+  testsOk &= (cama.getLastResultCode() == 0xFFFF);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -707,7 +707,7 @@ bool testFPCancel() {
   testStream.setBufferContent(buf_FPCancelSuccess,24);
   cama.sendFPCancel();
   testsOk &= (cama.getFPCancelResult() == true);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -726,7 +726,7 @@ bool testIdentifyWithCancel() {
   };
   testStream.setBufferContent(buf_IdentifyWithCancel,72);
   testsOk &= (cama.identify() == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_FP_CANCEL);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_FP_CANCEL);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
   fpUserActionReturnValue = true;
 
@@ -743,7 +743,7 @@ bool testTestConnection() {
   };
   testStream.setBufferContent(buf_TestConnectionSuccess,24);
   testsOk &= (cama.testConnection(false) == 1);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_SUCCESS);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_SUCCESS);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   Serial.println(); Serial.println(); Serial.println();
@@ -753,7 +753,7 @@ bool testTestConnection() {
   };
   testStream.setBufferContent(buf_TestConnectionFail,24);
   testsOk &= (cama.testConnection(false) == 0);
-  testsOk &= (cama.lastResultCode == Response_Packet::ResultCodes::ERR_FAIL);
+  testsOk &= (cama.getLastResultCode() == Response_Packet::ResultCodes::ERR_FAIL);
   Serial.print("END TEST: testsOk = "); Serial.println(testsOk);
 
   return testsOk;
@@ -762,7 +762,7 @@ bool testTestConnection() {
 void setup() {
   Serial.begin(9600);
 
-  cama.useSerialDebug=true;
+  cama.setSerialDebug(true); // so you can see the messages in the serial debug screen
   cama.setUserActionCallback(FPSUserAction);
 
   bool testsOk=true;

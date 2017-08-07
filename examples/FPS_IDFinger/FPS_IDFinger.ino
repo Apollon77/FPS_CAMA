@@ -63,12 +63,12 @@ bool FPSUserAction(const Command_Packet::Commands::Commands_Enum command, const 
 }
 void setup()
 {
-	  Serial.begin(9600);
+	Serial.begin(9600);
     Serial1.begin(115200); // start with communication to Device
-	  //fpsSoftSerial.begin(115200);
+	//fpsSoftSerial.begin(115200);
     fps.setUserActionCallback(FPSUserAction); // set callback method, see above
     fps.setSerialTimeout(20000);
-	  fps.useSerialDebug = true; // so you can see the messages in the serial debug screen
+    fps.setSerialDebug(true); // so you can see the messages in the serial debug screen
 
     bool testSuccess = fps.testConnection(true);
     Serial.print("FPS - testConnection = ");
@@ -132,8 +132,8 @@ void loop()
 		word detectedTemplateId = fps.identify();
 		if (detectedTemplateId == 0)
 		{
-            Serial.print("Finger not detected or ERROR while identification: lastResultCode =");
-            Serial.println(fps.lastResultCode);
+            Serial.print("Finger not detected or ERROR while identification: getLastResultCode() =");
+            Serial.println(fps.getLastResultCode());
 		}
 		else
 		{

@@ -249,19 +249,19 @@ class FPS_CAMA
 {
 
  public:
-     // Enables verbose debug output using hardware Serial
- 	bool useSerialDebug = false;
-
-    // Timeout for serial read in ms, should be higher then the Finger-Timeout because else it may produce problems
-	word serialTimeout = 6000;
-
-	// Last ResultCode
-	word lastResultCode = 0xFFFF;
-
 	// Creates a new object to interface with the fingerprint scanner
 	FPS_CAMA(Stream& streamInstance);
 
+    word getLastResultCode();
+
+    // Enables verbose debug output using hardware Serial
+    void setSerialDebug(bool debug);
+
+    bool setSerialDebug();
+
     void setSerialTimeout(word timeout);
+
+    word getSerialTimeout();
 
     Response_Packet* readAvailableResponse();
 
@@ -341,10 +341,6 @@ class FPS_CAMA
     // [Function] Test Connection
 	bool testConnection(bool retry);
 
-
-	void serialPrintHex(byte data);
-	void sendToSerial(byte data[], int length);
-
 	// resets the Data_Packet class, and gets ready to download
 	// Not implemented due to memory restrictions on the arduino
 	// may revisit this if I find a need for it
@@ -358,10 +354,20 @@ class FPS_CAMA
 	 void setUserActionCallback(FPSUserActionCallbackFunction callback);
 
 private:
-	 void sendCommand(byte cmd[], int length);
-	 Response_Packet* getResponse(Command_Packet::Commands::Commands_Enum awaitedResponseCode);
-	 Stream* _serial;
-	 FPSUserActionCallbackFunction userActionCallback = 0;
+    bool useSerialDebug = false;
+
+    // Timeout for serial read in ms, should be higher then the Finger-Timeout because else it may produce problems
+	word serialTimeout = 6000;
+
+	// Last ResultCode
+	word lastResultCode = 0xFFFF;
+
+    void serialPrintHex(byte data);
+    void sendToSerial(byte data[], int length);
+	void sendCommand(byte cmd[], int length);
+	Response_Packet* getResponse(Command_Packet::Commands::Commands_Enum awaitedResponseCode);
+	Stream* _serial;
+	FPSUserActionCallbackFunction userActionCallback = 0;
 };
 
 #endif

@@ -76,10 +76,10 @@ void setup()
 {
     Serial.begin(9600);
     Serial1.begin(115200); // start with communication to Device
-	  //fpsSoftSerial.begin(115200);
+	//fpsSoftSerial.begin(115200);
     fps.setUserActionCallback(FPSUserAction); // set callback method, see above
     fps.setSerialTimeout(20000);
-	  fps.useSerialDebug = true; // so you can see the messages in the serial debug screen
+    fps.setSerialDebug(true); // so you can see the messages in the serial debug screen
 
     bool testSuccess = fps.testConnection(true);
     Serial.print("FPS - testConnection = ");
@@ -147,8 +147,8 @@ void Enroll()
 	// find open enroll id
 	word enrollId = fps.getEmptyId();
     if (enrollId == 0) {
-        Serial.print("ERROR while getting next free Template Id for enrollment: lastResultCode =");
-        Serial.println(fps.lastResultCode);
+        Serial.print("ERROR while getting next free Template Id for enrollment: getLastResultCode() =");
+        Serial.println(fps.getLastResultCode());
         return;
     }
     Serial.print("Next free Template-ID for enrollment = ");
@@ -163,8 +163,8 @@ void Enroll()
         Serial.println();
     }
     else {
-        Serial.print("ERROR Template Status is not free: lastResultCode =");
-        Serial.println(fps.lastResultCode);
+        Serial.print("ERROR Template Status is not free: getLastResultCode() =");
+        Serial.println(fps.getLastResultCode());
         return;
     }
 
@@ -181,14 +181,14 @@ void Enroll()
             Serial.println("Verified, Template id is filled now.");
         }
         else {
-            Serial.print("ERROR Template Status is still free: lastResultCode =");
-            Serial.println(fps.lastResultCode);
+            Serial.print("ERROR Template Status is still free: getLastResultCode() =");
+            Serial.println(fps.getLastResultCode());
             return;
         }
     }
     else {
-        Serial.print("ERROR at enrollment process: lastResultCode =");
-        Serial.println(fps.lastResultCode);
+        Serial.print("ERROR at enrollment process: getLastResultCode() =");
+        Serial.println(fps.getLastResultCode());
     }
 }
 

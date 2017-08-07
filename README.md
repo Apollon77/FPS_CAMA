@@ -1,7 +1,7 @@
 # FPS_CAMA
-Arduino Library for communication with CAMA Fingerprint sensors/modules
+Arduino Library for communication with Camabio Fingerprint sensors/modules (http://www.camabio.com/)
 
-See folder "docs" for official firmware dodumentation.
+See folder "docs" for official firmware documentation.
 
 ## Functions
 Implemented functions currently are:
@@ -45,3 +45,7 @@ TEST SUCCESS: 1
 ```
 
 Then everything is good. Else search the test with result 0 and check it or send it to me.
+
+## TODO
+* finally write README
+* add Library to ArduinoIDE :-)
