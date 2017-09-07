@@ -1529,7 +1529,7 @@ bool FPS_CAMA::standbyMode()
 	lastResultCode = 0xFFFF;
 	if (rp->validResponse) {
 		lastResultCode = rp->resultCode;
-		if ((! rp->isError) && (rp->dataLength == 0)) {
+		if (! rp->isError) {
             res = true;
         }
 	}
