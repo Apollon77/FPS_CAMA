@@ -1,8 +1,8 @@
 /*
-	FPS_Enroll.ino - Library example for controlling the CAMA Finger Print Scanner (FPS)
-	Created by Ingo Fischer, August 02rd 2017
+    FPS_Enroll.ino - Library example for controlling the CAMA Finger Print Scanner (FPS)
+    Created by Ingo Fischer, August 02rd 2017
 
-	This sketch execute the enrollment process (with 3 finger swipes) and output
+    This sketch execute the enrollment process (with 3 finger swipes) and output
     the resulting template id.
 */
 
@@ -76,7 +76,7 @@ void setup()
 {
     Serial.begin(9600);
     Serial1.begin(115200); // start with communication to Device
-	//fpsSoftSerial.begin(115200);
+    //fpsSoftSerial.begin(115200);
     fps.setUserActionCallback(FPSUserAction); // set callback method, see above
     fps.setSerialTimeout(20000);
     fps.setSerialDebug(true); // so you can see the messages in the serial debug screen
@@ -137,15 +137,14 @@ void setup()
     Serial.println();
 */
 
-    Enroll();
 }
 
 void Enroll()
 {
-	// Enroll test
+    // Enroll test
 
-	// find open enroll id
-	word enrollId = fps.getEmptyId();
+    // find open enroll id
+    word enrollId = fps.getEmptyId();
     if (enrollId == 0) {
         Serial.print("ERROR while getting next free Template Id for enrollment: getLastResultCode() =");
         Serial.println(fps.getLastResultCode());
@@ -168,7 +167,7 @@ void Enroll()
         return;
     }
 
-	// enroll, LED will be turned on Automatically
+    // enroll, LED will be turned on Automatically
     Serial.println();
     Serial.println("Enrollment started ...");
     bool result = fps.enroll(enrollId);
@@ -195,4 +194,7 @@ void Enroll()
 
 void loop()
 {
+  Enroll();
+
+  delay(10000);
 }

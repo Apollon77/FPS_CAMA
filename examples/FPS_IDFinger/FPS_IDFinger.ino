@@ -1,8 +1,8 @@
 /*
-	FPS_Enroll.ino - Library example for controlling the CAMA Finger Print Scanner (FPS)
-	Created by Ingo Fischer, August 02rd 2017
+    FPS_Enroll.ino - Library example for controlling the CAMA Finger Print Scanner (FPS)
+    Created by Ingo Fischer, August 02rd 2017
 
-	This sketch runs the identification procedure and returns the detected template id.
+    This sketch runs the identification procedure and returns the detected template id.
 */
 
 #include "FPS_CAMA.h"
@@ -61,11 +61,13 @@ bool FPSUserAction(const Command_Packet::Commands::Commands_Enum command, const 
   }
   return true;
 }
+
 void setup()
 {
-	Serial.begin(9600);
+      Serial.begin(9600);
+
     Serial1.begin(115200); // start with communication to Device
-	//fpsSoftSerial.begin(115200);
+    //fpsSoftSerial.begin(115200);
     fps.setUserActionCallback(FPSUserAction); // set callback method, see above
     fps.setSerialTimeout(20000);
     fps.setSerialDebug(true); // so you can see the messages in the serial debug screen
@@ -126,26 +128,28 @@ void setup()
 
 void loop()
 {
-	// Identify fingerprint test
+    // Identify fingerprint test
     if (fps.fingerDetect())
-	{
-		word detectedTemplateId = fps.identify();
-		if (detectedTemplateId == 0)
-		{
+    {
+        word detectedTemplateId = fps.identify();
+        if (detectedTemplateId == 0)
+        {
             Serial.print("Finger not detected or ERROR while identification: getLastResultCode() =");
             Serial.println(fps.getLastResultCode());
-		}
-		else
-		{
+        }
+        else
+        {
             Serial.print("Finger Successfully detected: Id=");
-			Serial.println(detectedTemplateId);
-		}
+            Serial.println(detectedTemplateId);
+
+        }
+
         Serial.println();
         Serial.println();
         Serial.println("Please put your finger on the scanning area to start the identification ...");
         Serial.println();
         fps.setSensorLed(true); // turn on the LED inside the fps
-	}
-	delay(1000);
+    }
+    delay(1000);
 
 }

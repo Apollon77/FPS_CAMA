@@ -1,15 +1,15 @@
 /*
-	FPS_CAMA_Tests.ino - Library example for controlling the CAMA Finger Print Scanner (FPS)
-	Created by Ingo Fischer, August 02rd 2017
+    FPS_CAMA_Tests.ino - Library example for controlling the CAMA Finger Print Scanner (FPS)
+    Created by Ingo Fischer, August 02rd 2017
 
-	This sketch acts as unit tests and execute all library functions against simulated results
+    This sketch acts as unit tests and execute all library functions against simulated results
 */
 #include <FPS_CAMA.h>
 #include <MemStream.h>
 
 /*
  * TODO:
- * - Aufsplitten in mehrere CPP Files
+ * - Split in multiple files
  *
  */
 
@@ -638,7 +638,7 @@ bool testStandbyMode() {
   Serial.println(); Serial.println(); Serial.println();
   Serial.println("RUN TEST 'StandbyModeSuccess' ...");
   byte buf_StandbyModeSuccess[24] = {
-    0xAA, 0x55, 0x17, 0x01, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0B, 0x01
+    0xAA, 0x55, 0x17, 0x01, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1C, 0x01
   };
   testStream.setBufferContent(buf_StandbyModeSuccess,24);
   testsOk &= (cama.standbyMode() == true);
@@ -787,6 +787,7 @@ void setup() {
   testsOk &= testSetBaudrate();
   testsOk &= testSetDuplicationCheck();
   testsOk &= testGetDuplicationCheck();
+  testsOk &= testStandbyMode();
   testsOk &= testSetSensorLed();
   testsOk &= testGetEnrollCount();
   testsOk &= testFPCancel();

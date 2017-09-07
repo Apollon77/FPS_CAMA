@@ -1,10 +1,10 @@
 /*
-	FPS_Enroll.ino - Library example for controlling the CAMA Finger Print Scanner (FPS)
-	Created by Ingo Fischer, August 02rd 2017
+    FPS_Enroll.ino - Library example for controlling the CAMA Finger Print Scanner (FPS)
+    Created by Ingo Fischer, August 02rd 2017
 
-	This simple sketch outputs some basic settings at the start and then turns the
+    This simple sketch outputs some basic settings at the start and then turns the
     LED on and off similar to the Arduino blink sketch.
-	It is used to show that communications are working.
+    It is used to show that communications are working.
 */
 
 #include "FPS_CAMA.h"
@@ -27,11 +27,11 @@ FPS_CAMA fps(Serial1);
 
 void setup()
 {
-   	Serial.begin(9600);
+    Serial.begin(9600);
     Serial1.begin(115200); // start with communication to Device
-	//fpsSoftSerial.begin(115200);
+    //fpsSoftSerial.begin(115200);
     fps.setSerialTimeout(6000);
-	fps.setSerialDebug(true); // so you can see the messages in the serial debug screen
+    fps.setSerialDebug(true); // so you can see the messages in the serial debug screen
 
     bool testSuccess = fps.testConnection(true);
     Serial.print("FPS - testConnection = ");
@@ -65,9 +65,9 @@ void setup()
 
 void loop()
 {
-	// FPS Blink LED Test
-	fps.setSensorLed(true); // turn on the LED inside the fps
-	delay(1000);
-	fps.setSensorLed(false);// turn off the LED inside the fps
-	delay(1000);
+    // FPS Blink LED Test
+    fps.setSensorLed(true); // turn on the LED inside the fps
+    delay(1000);
+    fps.setSensorLed(false);// turn off the LED inside the fps
+    delay(1000);
 }
