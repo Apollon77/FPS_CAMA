@@ -13,11 +13,15 @@ before_install:
   - git clone --depth=50 --branch=master https://github.com/Apollon77/MemStream.git ../MemStream
   - cd ../MemStream
   - git checkout
+  - git clone --depth=50 --branch=master https://github.com/maniacbug/MemoryFree.git ../MemoryFree
+  - cd ../MemoryFree
+  - git checkout
   - cd ../FPS_CAMA
 
 install:
   - ln -s $PWD /usr/local/share/arduino/libraries/FPS_CAMA
   - ln -s $PWD/../MemStream /usr/local/share/arduino/libraries/MemStream
+  - ln -s $PWD/../MemoryFree /usr/local/share/arduino/libraries/MemoryFree
 
 script:
   - arduino --verify --board ${BOARD} $PWD/examples/FPSIncludeTest/FPSIncludeTest.ino
@@ -31,10 +35,10 @@ env:
 # - ARDUINO_IDE_VERSION=1.6.13 BOARD=arduino:avr:diecimila:cpu=atmega328
 # - ARDUINO_IDE_VERSION=1.6.13 BOARD=arduino:avr:nano:cpu=atmega168
 # - ARDUINO_IDE_VERSION=1.6.13 BOARD=arduino:avr:nano:cpu=atmega328
- - ARDUINO_IDE_VERSION=1.6.13 BOARD=arduino:avr:mega:cpu=atmega1280
+ - ARDUINO_IDE_VERSION=1.8.4 BOARD=arduino:avr:mega:cpu=atmega1280
  - ARDUINO_IDE_VERSION=1.6.5 BOARD=arduino:avr:mega:cpu=atmega2560
- - ARDUINO_IDE_VERSION=1.6.10 BOARD=arduino:avr:mega:cpu=atmega2560
  - ARDUINO_IDE_VERSION=1.6.13 BOARD=arduino:avr:mega:cpu=atmega2560
+ - ARDUINO_IDE_VERSION=1.8.4 BOARD=arduino:avr:mega:cpu=atmega2560
 # - ARDUINO_IDE_VERSION=1.6.13 BOARD=arduino:avr:megaADK
 # - ARDUINO_IDE_VERSION=1.6.13 BOARD=arduino:avr:leonardo
 # - ARDUINO_IDE_VERSION=1.6.13 BOARD=arduino:avr:micro
