@@ -8,16 +8,19 @@
 
 #include "FPS_CAMA.h"
 
-//DONE
+
 Command_Packet::Command_Packet(Commands::Commands_Enum _command, word _dataLength) :
   command(_command), dataLength(_dataLength)
 {
 	memset(commandData, 0, sizeof(commandData)); // Clear Command Data Array
 };
 
+Command_Packet::~Command_Packet() {
+}
+
 // returns the 24 bytes of the generated command packet
 // remember to call delete on the returned array
-//DONE
+
 byte* Command_Packet::getPacketBytes()
 {
 	byte* packetbytes= new byte[24];
@@ -42,28 +45,28 @@ byte* Command_Packet::getPacketBytes()
 }
 
 // Returns the high byte from a word
-//DONE
+
 byte Command_Packet::getHighByte(word w)
 {
 	return (byte)(w>>8)&0x00FF;
 }
 
 // Returns the low byte from a word
-//DONE
+
 byte Command_Packet::getLowByte(word w)
 {
 	return (byte)w&0x00FF;
 }
 
 // add a byte to CommandData array starting at Index index
-//DONE
+
 void Command_Packet::addByteToCommandData(byte index, byte value)
 {
 	commandData[index] = value;
 }
 
 // add a word to CommandData array starting at Index index
-//DONE
+
 void Command_Packet::addWordToCommandData(byte index, word value)
 {
 	commandData[index] = getLowByte(value);
@@ -71,7 +74,7 @@ void Command_Packet::addWordToCommandData(byte index, word value)
 }
 
 // add an int to CommandData array starting at Index index
-//DONE
+
 void Command_Packet::addIntToCommandData(byte index, int value)
 {
 	commandData[index] = (value & 0x000000ff);
@@ -81,7 +84,7 @@ void Command_Packet::addIntToCommandData(byte index, int value)
 }
 
 // calculate Checksum
-//DONE
+
 word Command_Packet::calculateChecksum(byte* data)
 {
 	word w = 0;
@@ -95,26 +98,25 @@ word Command_Packet::calculateChecksum(byte* data)
 
 
 // creates and parses a response packet from the finger print scanner
-//DONE
-Response_Packet::Response_Packet(byte* buffer, word awaitedResponseCode, bool useSerialDebug)
+Response_Packet::Response_Packet(byte* buffer, word awaitedResponseCode, bool useDebug, Print *debugTarget)
 {
     memset(dataBytes, 0, sizeof(dataBytes)); // Clear DataBytes Array
     if (buffer != NULL) {
         validResponse = true;
-    	validResponse &= checkParsing(buffer[0], RESPONSE_START_CODE_1, RESPONSE_START_CODE_1, (char *)"RESPONSE_START_CODE_1", useSerialDebug);
-    	validResponse &= checkParsing(buffer[1], RESPONSE_START_CODE_2, RESPONSE_START_CODE_2, (char *)"RESPONSE_START_CODE_2", useSerialDebug);
+    	validResponse &= checkParsing(buffer[0], RESPONSE_START_CODE_1, RESPONSE_START_CODE_1, (char *)"RESPONSE_START_CODE_1", useDebug, debugTarget);
+    	validResponse &= checkParsing(buffer[1], RESPONSE_START_CODE_2, RESPONSE_START_CODE_2, (char *)"RESPONSE_START_CODE_2", useDebug, debugTarget);
 
     	word checksum = calculateChecksum(buffer, 22);
     	byte checksum_low = getLowByte(checksum);
     	byte checksum_high = getHighByte(checksum);
-    	validResponse &= checkParsing(buffer[22], checksum_low, checksum_low, (char *)"Checksum_LOW", useSerialDebug);
-    	validResponse &= checkParsing(buffer[23], checksum_high, checksum_high, (char *)"Checksum_HIGH", useSerialDebug);
+    	validResponse &= checkParsing(buffer[22], checksum_low, checksum_low, (char *)"Checksum_LOW", useDebug, debugTarget);
+    	validResponse &= checkParsing(buffer[23], checksum_high, checksum_high, (char *)"Checksum_HIGH", useDebug, debugTarget);
 
         if (awaitedResponseCode != 0xFFFF) {
             byte responseCode_low=getLowByte(awaitedResponseCode);
         	byte responseCode_high=getHighByte(awaitedResponseCode);
-        	validResponse &= checkParsing(buffer[2], responseCode_low, responseCode_low, (char *)"ResponseCode_HIGH", useSerialDebug);
-        	validResponse &= checkParsing(buffer[3], responseCode_high, responseCode_high, (char *)"ResponseCode_LOW", useSerialDebug);
+        	validResponse &= checkParsing(buffer[2], responseCode_low, responseCode_low, (char *)"ResponseCode_HIGH", useDebug, debugTarget);
+        	validResponse &= checkParsing(buffer[3], responseCode_high, responseCode_high, (char *)"ResponseCode_LOW", useDebug, debugTarget);
         }
     	dataLength=wordFromBytes(buffer,4)-2;
 
@@ -136,8 +138,11 @@ Response_Packet::Response_Packet(byte* buffer, word awaitedResponseCode, bool us
     }
 }
 
+Response_Packet::~Response_Packet() {
+}
+
 // parses bytes into one of the possible errors from the finger print scanner
-//DONE
+
 Response_Packet::ResultCodes::ResultCodes_Enum Response_Packet::ResultCodes::parseFromBytes(word resultCode)
 {
 	ResultCodes_Enum e = INVALID;
@@ -184,7 +189,7 @@ Response_Packet::ResultCodes::ResultCodes_Enum Response_Packet::ResultCodes::par
 }
 
 // Gets an int from the parameter bytes
-//DONE
+
 int Response_Packet::intFromBytes(byte* buffer, byte index)
 {
 	int retval = 0;
@@ -196,7 +201,7 @@ int Response_Packet::intFromBytes(byte* buffer, byte index)
 }
 
 // Gets an int from the parameter bytes
-//DONE
+
 word Response_Packet::wordFromBytes(byte* buffer, byte index)
 {
 	word retval = 0;
@@ -206,7 +211,7 @@ word Response_Packet::wordFromBytes(byte* buffer, byte index)
 }
 
 // calculates the checksum from the bytes in the packet
-//DONE
+
 word Response_Packet::calculateChecksum(byte* buffer, int length)
 {
 	word checksum = 0;
@@ -218,46 +223,230 @@ word Response_Packet::calculateChecksum(byte* buffer, int length)
 }
 
 // Returns the high byte from a word
-//DONE
 byte Response_Packet::getHighByte(word w)
 {
 	return (byte)(w>>8)&0x00FF;
 }
 
 // Returns the low byte from a word
-//DONE
 byte Response_Packet::getLowByte(word w)
 {
 	return (byte)w&0x00FF;
 }
 
 // checks to see if the byte is the proper value, and logs it to the serial channel if not
-//DONE
-bool Response_Packet::checkParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool useSerialDebug)
+bool Response_Packet::checkParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool useDebug, Print *debugTarget)
 {
 	bool retval = (b != propervalue) && (b != alternatevalue);
-	if ((useSerialDebug) && (retval))
+	if ((useDebug) && (retval))
 	{
-		Serial.print("Response_Packet parsing error ");
-		Serial.print(varname);
-		Serial.print(" ");
-		Serial.print(propervalue, HEX);
-		Serial.print(" || ");
-		Serial.print(alternatevalue, HEX);
-		Serial.print(" != ");
-		Serial.println(b, HEX);
+		debugTarget->print(F("Response_Packet parsing error "));
+		debugTarget->print(varname);
+		debugTarget->print(F(" "));
+		debugTarget->print(propervalue, HEX);
+		debugTarget->print(F(" || "));
+		debugTarget->print(alternatevalue, HEX);
+		debugTarget->print(F(" != "));
+		debugTarget->println(b, HEX);
 	}
 	return (! retval);
 }
 
 
-//#pragma region -= Data_Packet =-
-//void Data_Packet::StartNewPacket()
-//{
-//	Data_Packet::NextPacketID = 0;
-//	Data_Packet::CheckSum = 0;
-//}
-//#pragma endregion
+Command_Data_Packet::Command_Data_Packet(Command_Packet::Commands::Commands_Enum _command, byte* _commandData, word _dataLength, word _dataAddLength) :
+  command(_command), commandDataLength(_dataLength), commandData(_commandData), commandDataAddLength(_dataAddLength)
+{
+    commandDataAdd = new byte[_dataAddLength];
+};
+
+Command_Data_Packet::~Command_Data_Packet() {
+    delete[] commandDataAdd;
+}
+
+// returns the 24 bytes of the generated command packet
+// remember to call delete on the returned array
+byte* Command_Data_Packet::getPacketBytes()
+{
+	byte* packetbytes= new byte[commandDataLength+commandDataAddLength+10];
+	// update command before calculating checksum (important!)
+	word cmd = command;
+
+	packetbytes[0] = COMMAND_START_CODE_1;
+	packetbytes[1] = COMMAND_START_CODE_2;
+	packetbytes[2] = getLowByte(cmd);
+	packetbytes[3] = getHighByte(cmd);
+	packetbytes[4] = getLowByte(commandDataLength+commandDataAddLength);
+	packetbytes[5] = getHighByte(commandDataLength+commandDataAddLength);
+    for (word i=0;i<commandDataAddLength;i++) packetbytes[i+6] = commandDataAdd[i];
+    for (word i=0;i<commandDataLength;i++) packetbytes[i+commandDataAddLength+6] = commandData[i];
+    //memcpy(&packetbytes[commandDataAddLength+6], commandData, commandDataLength);
+	word checksum = calculateChecksum(packetbytes);
+
+	packetbytes[commandDataLength+commandDataAddLength+6] = getLowByte(checksum);
+	packetbytes[commandDataLength+commandDataAddLength+7] = getHighByte(checksum);
+
+	return packetbytes;
+}
+
+// Returns the high byte from a word
+byte Command_Data_Packet::getHighByte(word w)
+{
+	return (byte)(w>>8)&0x00FF;
+}
+
+// Returns the low byte from a word
+byte Command_Data_Packet::getLowByte(word w)
+{
+	return (byte)w&0x00FF;
+}
+
+// add a byte to CommandData array starting at Index index
+
+void Command_Data_Packet::addByteToCommandAddData(byte index, byte value)
+{
+	commandDataAdd[index] = value;
+}
+
+// add a word to CommandData array starting at Index index
+
+void Command_Data_Packet::addWordToCommandAddData(byte index, word value)
+{
+	commandDataAdd[index] = getLowByte(value);
+	commandDataAdd[index+1] = getHighByte(value);
+}
+
+// add an int to CommandData array starting at Index index
+
+void Command_Data_Packet::addIntToCommandAddData(byte index, int value)
+{
+	commandDataAdd[index] = (value & 0x000000ff);
+	commandDataAdd[index+1] = (value & 0x0000ff00) >> 8;
+	commandDataAdd[index+2] = (value & 0x00ff0000) >> 16;
+	commandDataAdd[index+3] = (value & 0xff000000) >> 24;
+}
+
+// calculate Checksum
+word Command_Data_Packet::calculateChecksum(byte* data)
+{
+	word w = 0;
+	for (word i=0;i<(6+commandDataLength+commandDataAddLength);i++) {
+	  w += data[i];
+	}
+
+	return w;
+}
+
+
+
+// creates and parses a response packet from the finger print scanner
+Response_Data_Packet::Response_Data_Packet(byte* buffer, word awaitedResponseCode, bool useDebug, Print* debugTarget)
+{
+    if (buffer != NULL) {
+        validResponse = true;
+    	validResponse &= checkParsing(buffer[0], RESPONSE_START_CODE_1, RESPONSE_START_CODE_1, (char *)"RESPONSE_START_CODE_1", useDebug, debugTarget);
+    	validResponse &= checkParsing(buffer[1], RESPONSE_START_CODE_2, RESPONSE_START_CODE_2, (char *)"RESPONSE_START_CODE_2", useDebug, debugTarget);
+
+        dataLength=wordFromBytes(buffer,4)-2;
+    	word checksum = calculateChecksum(buffer, dataLength+8);
+    	byte checksum_low = getLowByte(checksum);
+    	byte checksum_high = getHighByte(checksum);
+    	validResponse &= checkParsing(buffer[dataLength+8], checksum_low, checksum_low, (char *)"Checksum_LOW", useDebug, debugTarget);
+    	validResponse &= checkParsing(buffer[dataLength+9], checksum_high, checksum_high, (char *)"Checksum_HIGH", useDebug, debugTarget);
+
+        if (awaitedResponseCode != 0xFFFF) {
+            byte responseCode_low=getLowByte(awaitedResponseCode);
+        	byte responseCode_high=getHighByte(awaitedResponseCode);
+        	validResponse &= checkParsing(buffer[2], responseCode_low, responseCode_low, (char *)"ResponseCode_HIGH", useDebug, debugTarget);
+        	validResponse &= checkParsing(buffer[3], responseCode_high, responseCode_high, (char *)"ResponseCode_LOW", useDebug, debugTarget);
+        }
+
+    	resultCode = Response_Packet::ResultCodes::parseFromBytes(wordFromBytes(buffer,6));
+    	if (resultCode==0) isError=false;
+    	  else if (resultCode==1) isError=true;
+    	  else validResponse=false;
+
+    	if (dataLength>0) {
+            dataBytes = new byte[dataLength];
+    		for (word i=0; i < dataLength; i++)
+    		{
+    			dataBytes[i]=buffer[8+i];
+    		}
+    	}
+    }
+    else {
+        validResponse = false;
+    }
+}
+
+Response_Data_Packet::~Response_Data_Packet() {
+    delete[] dataBytes;
+}
+
+
+// Gets an int from the parameter bytes
+
+int Response_Data_Packet::intFromBytes(byte* buffer, byte index)
+{
+	int retval = 0;
+	retval = (retval << 8) + buffer[index+3];
+	retval = (retval << 8) + buffer[index+2];
+	retval = (retval << 8) + buffer[index+1];
+	retval = (retval << 8) + buffer[index+0];
+	return retval;
+}
+
+// Gets an int from the parameter bytes
+
+word Response_Data_Packet::wordFromBytes(byte* buffer, byte index)
+{
+	word retval = 0;
+	retval = (retval << 8) + buffer[index+1];
+	retval = (retval << 8) + buffer[index+0];
+	return retval;
+}
+
+// calculates the checksum from the bytes in the packet
+
+word Response_Data_Packet::calculateChecksum(byte* buffer, int length)
+{
+	word checksum = 0;
+	for (int i=0; i<length; i++)
+	{
+		checksum +=buffer[i];
+	}
+	return checksum;
+}
+
+// Returns the high byte from a word
+byte Response_Data_Packet::getHighByte(word w)
+{
+	return (byte)(w>>8)&0x00FF;
+}
+
+// Returns the low byte from a word
+byte Response_Data_Packet::getLowByte(word w)
+{
+	return (byte)w&0x00FF;
+}
+
+// checks to see if the byte is the proper value, and logs it to the serial channel if not
+bool Response_Data_Packet::checkParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool useDebug, Print *debugTarget)
+{
+	bool retval = (b != propervalue) && (b != alternatevalue);
+	if ((useDebug) && (retval))
+	{
+		debugTarget->print(F("Response_Data_Packet parsing error "));
+		debugTarget->print(varname);
+		debugTarget->print(F(" "));
+		debugTarget->print(propervalue, HEX);
+		debugTarget->print(F(" || "));
+		debugTarget->print(alternatevalue, HEX);
+		debugTarget->print(F(" != "));
+		debugTarget->println(b, HEX);
+	}
+	return (! retval);
+}
+
 
 
 // Creates a new object to interface with the fingerprint scanner
@@ -267,12 +456,17 @@ FPS_CAMA::FPS_CAMA(Stream& streamInstance)
   // nothing to do
 };
 
-void FPS_CAMA::setSerialDebug(bool debug) {
-    useSerialDebug = debug;
+void FPS_CAMA::setDebugTarget(Print* target) {
+    debugTarget = target;
 }
 
-bool FPS_CAMA::setSerialDebug() {
-    return useSerialDebug;
+
+void FPS_CAMA::setDebug(bool debug) {
+    useDebug = debug;
+}
+
+bool FPS_CAMA::setDebug() {
+    return useDebug;
 }
 
 // getLastResultCode
@@ -320,7 +514,7 @@ word FPS_CAMA::getSerialTimeout()
 bool FPS_CAMA::verify(word templateId)
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - verify");
+	if (useDebug) debugTarget->println(F("FPS - verify"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::Verify,2);
 	cp->addWordToCommandData(0, templateId);
@@ -363,14 +557,14 @@ bool FPS_CAMA::verify(word templateId)
 	}
 	delete rp1;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - verify Result for templateId ");
-        Serial.print(templateId);
-        Serial.print("=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - verify Result for templateId "));
+        debugTarget->print(templateId);
+        debugTarget->print(F("="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -403,7 +597,7 @@ bool FPS_CAMA::verify(word templateId)
 word FPS_CAMA::identify()
 {
 	word res = 0;
-	if (useSerialDebug) Serial.println("FPS - identify");
+	if (useDebug) debugTarget->println(F("FPS - identify"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::Identify,0);
 
@@ -444,12 +638,12 @@ word FPS_CAMA::identify()
 	}
 	delete rp1;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - identify Result templateId=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - identify Result templateId="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -500,7 +694,7 @@ word FPS_CAMA::identify()
 bool FPS_CAMA::enroll(word templateId)
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - enroll");
+	if (useDebug) debugTarget->println(F("FPS - enroll"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::Enroll,2);
 	cp->addWordToCommandData(0, templateId);
@@ -528,7 +722,8 @@ bool FPS_CAMA::enroll(word templateId)
 							else lastResultCode=Response_Packet::ResultCodes::ERR_VERIFY;
 					}
                     else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
-					break;
+                    delete rp;
+                    break;
 				}
 				else if ((lastResultCode == Response_Packet::ResultCodes::GD_NEED_FIRST_SWEEP) ||
 				         (lastResultCode == Response_Packet::ResultCodes::GD_NEED_SECOND_SWEEP) ||
@@ -539,6 +734,7 @@ bool FPS_CAMA::enroll(word templateId)
 					  // ERROR in Process
 					  sendFPCancel();
                       cancel=true;
+                      delete rp;
 					  break;
 					}
 
@@ -547,6 +743,7 @@ bool FPS_CAMA::enroll(word templateId)
 					    cancel=(! userActionCallback(Command_Packet::Commands::Enroll, Response_Packet::ResultCodes::parseFromBytes(lastResultCode)));
 					    if (cancel) {
 					    	sendFPCancel();
+                            delete rp;
 					    	break;
 				    	}
 				    }
@@ -559,14 +756,17 @@ bool FPS_CAMA::enroll(word templateId)
 					// ERROR in Process
 					sendFPCancel();
                     cancel=true;
+                    delete rp;
 					break;
 				}
 			}
 			else {
+                delete rp;
 				break;
 			}
 		}
         else {
+            delete rp;
             break;
         }
 		delete rp;
@@ -581,16 +781,17 @@ bool FPS_CAMA::enroll(word templateId)
         if (cancel && (lastResultCode == Response_Packet::ResultCodes::ERR_FP_CANCEL)) {
             getFPCancelResult();
         }
+        delete rp;
     }
 
-	if (useSerialDebug) {
-		Serial.print("FPS - enroll Result for templateId ");
-        Serial.print(templateId);
-        Serial.print("=");
-        Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - enroll Result for templateId "));
+        debugTarget->print(templateId);
+        debugTarget->print(F("="));
+        debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -626,7 +827,7 @@ bool FPS_CAMA::enroll(word templateId)
 bool FPS_CAMA::enrollOneTime(word templateId)
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - enrollOneTime");
+	if (useDebug) debugTarget->println(F("FPS - enrollOneTime"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::EnrollOneTime,2);
 	cp->addWordToCommandData(0, templateId);
@@ -669,14 +870,14 @@ bool FPS_CAMA::enrollOneTime(word templateId)
 	}
 	delete rp1;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - enrollOneTime Result for templateId ");
-        Serial.print(templateId);
-        Serial.print("=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - enrollOneTime Result for templateId "));
+        debugTarget->print(templateId);
+        debugTarget->print(F("="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -702,7 +903,7 @@ bool FPS_CAMA::enrollOneTime(word templateId)
 bool FPS_CAMA::clearTemplate(word templateId)
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - clearTemplate");
+	if (useDebug) debugTarget->println(F("FPS - clearTemplate"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::ClearTemplate,2);
 	cp->addWordToCommandData(0, templateId);
@@ -725,12 +926,12 @@ bool FPS_CAMA::clearTemplate(word templateId)
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - clearTemplate Result=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - clearTemplate Result="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -751,7 +952,7 @@ bool FPS_CAMA::clearTemplate(word templateId)
 word FPS_CAMA::clearAllTemplate()
 {
 	word res = 0;
-	if (useSerialDebug) Serial.println("FPS - clearAllTemplate");
+	if (useDebug) debugTarget->println(F("FPS - clearAllTemplate"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::ClearAllTemplate,0);
 
@@ -770,12 +971,12 @@ word FPS_CAMA::clearAllTemplate()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - clearAllTemplate Result number deleted=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - clearAllTemplate Result number deleted="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -800,7 +1001,7 @@ word FPS_CAMA::clearAllTemplate()
 word FPS_CAMA::getEmptyId()
 {
 	word res = 0;
-	if (useSerialDebug) Serial.println("FPS - getEmptyId");
+	if (useDebug) debugTarget->println(F("FPS - getEmptyId"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::GetEmptyId,0);
 
@@ -819,12 +1020,12 @@ word FPS_CAMA::getEmptyId()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - getEmptyId Result first free=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - getEmptyId Result first free="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -848,7 +1049,7 @@ word FPS_CAMA::getEmptyId()
 bool FPS_CAMA::getTemplateStatus(word templateId)
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - getTemplateStatus");
+	if (useDebug) debugTarget->println(F("FPS - getTemplateStatus"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::GetTemplateStatus,2);
 	cp->addWordToCommandData(0, templateId);
@@ -871,12 +1072,12 @@ bool FPS_CAMA::getTemplateStatus(word templateId)
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - getTemplateStatus Result=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - getTemplateStatus Result="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -902,7 +1103,7 @@ bool FPS_CAMA::getTemplateStatus(word templateId)
 word FPS_CAMA::getBrokenTemplate()
 {
 	word res = 0;
-	if (useSerialDebug) Serial.println("FPS - getBrokenTemplate");
+	if (useDebug) debugTarget->println(F("FPS - getBrokenTemplate"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::GetBrokenTemplate,0);
 
@@ -925,14 +1126,163 @@ word FPS_CAMA::getBrokenTemplate()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - getBrokenTemplate Result first broken=");
-		Serial.print(res);
-        Serial.print(", number Broken=");
-		Serial.print(brokenCount);
-        Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - getBrokenTemplate Result first broken="));
+		debugTarget->print(res);
+        debugTarget->print(F(", number Broken="));
+		debugTarget->print(brokenCount);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
+	}
+
+	return res;
+}
+
+
+/*
+  [Function]
+     Read fingerprint Template data with specified Template No. from the module
+  [Parameter]
+  	 templateId - templateId to read
+     templatePtr - pointer to a place with enough allocated place to store result (498 bytes)
+
+  [Return value]
+  	 true on success, false on error
+
+  [Operation Sequence]
+	1) if the appoint template No. is invalid,result= ERR_INVALID_TMPL_NO
+    2) if the appoint template No. is inexistence template data,result=ERR_TMPL_EMPTY
+    3) else result= (Template Record Size + 2), denote that length of the data field of Response data packet
+    4) utilize Response data packet to transmit the template data
+*/
+bool FPS_CAMA::readTemplate(word templateId, byte* templatePtr) {
+    word res = false;
+	if (useDebug) debugTarget->println(F("FPS - readTemplate"));
+
+	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::ReadTemplate,2);
+    cp->addWordToCommandData(0, templateId);
+
+	byte* packetbytes = cp->getPacketBytes();
+	sendCommand(packetbytes, 24);
+	delete packetbytes;
+	delete cp;
+
+	Response_Packet* rp = getResponse(Command_Packet::Commands::ReadTemplate);
+
+    word dataLength = 0;
+	lastResultCode = 0xFFFF;
+	if (rp->validResponse) {
+		lastResultCode = rp->resultCode;
+		if ((! rp->isError) && (rp->dataLength == 2)) {
+            dataLength = rp->wordFromBytes(rp->dataBytes,0);
+            if (dataLength>0) {
+                Response_Data_Packet* rpd = getResponseData(Command_Packet::Commands::ReadTemplate, dataLength);
+
+            	lastResultCode = 0xFFFF;
+            	if (rpd->validResponse) {
+            		lastResultCode = rpd->resultCode;
+            		if ((! rpd->isError) && (rpd->wordFromBytes(rpd->dataBytes,0) == templateId)) {
+                        res = true;
+                        for (word i=2; i < dataLength; i++)
+                        {
+                            templatePtr[i-2]=rpd->dataBytes[i];
+                        }
+                    }
+                }
+                delete rpd;
+            }
+        }
+        else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
+	}
+    delete rp;
+
+	if (useDebug) {
+		debugTarget->print(F("FPS - readTemplate Result="));
+		debugTarget->print(res);
+        debugTarget->print(F(", template bytes="));
+		debugTarget->print(dataLength);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
+	}
+
+	return res;
+}
+
+/*
+  [Function]
+     Download fingerprint data with specified ID from host to module, then
+     write to fingerprint template Database
+  [Parameter]
+  	 templateId - templateId to read
+     templatePtr - pointer to a place with enough allocated place to store result (498 bytes)
+
+  [Return value]
+  	 true on success, false on error
+
+  [Operation Sequence]
+	Host send Write Template command to cause module wait for receive Command Data Packet to get template data from Host
+    1) Module check the Command packet whether is correct or not
+       if size of Template record is incorrectness,result=ERR_INVALID_PARAM
+       else return response packet and prepare receive template data (Command Data Packet)
+    2) Host send Command Data Packet with template No. and Template Data
+    3) after receive Command Data Packet is successful,
+       if the appoint template No. is invalid,result= ERR_INVALID_TMPL_NO
+       if CheckSum of Template Data is incorrectness,result=ERR_INVALID_PARAM
+    4) else Template Data that received write to Flash Memory
+*/
+bool FPS_CAMA::writeTemplate(word templateId, byte* templatePtr) {
+    word res = false;
+	if (useDebug) debugTarget->println(F("FPS - writeTemplate"));
+
+	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::WriteTemplate, 2);
+    cp->addWordToCommandData(0, FPS_TEMPLATE_SIZE);
+
+	byte* packetbytes = cp->getPacketBytes();
+	sendCommand(packetbytes, 24);
+	delete packetbytes;
+	delete cp;
+
+	Response_Packet* rp = getResponse(Command_Packet::Commands::WriteTemplate);
+
+	lastResultCode = 0xFFFF;
+	if (rp->validResponse) {
+		lastResultCode = rp->resultCode;
+		if ((! rp->isError) && (rp->dataLength == 2)) {
+            if (rp->wordFromBytes(rp->dataBytes,0) == 0) {
+                Command_Data_Packet* cdp = new Command_Data_Packet(Command_Packet::Commands::WriteTemplate, templatePtr, FPS_TEMPLATE_SIZE, 2);
+                cdp->addWordToCommandAddData(0, templateId);
+
+                byte* packetbytes2 = cdp->getPacketBytes();
+            	sendCommand(packetbytes2, FPS_TEMPLATE_SIZE+10);
+            	delete packetbytes2;
+            	delete cdp;
+
+                Response_Data_Packet* rdp = getResponseData(Command_Packet::Commands::WriteTemplate, 2);
+
+             	lastResultCode = 0xFFFF;
+            	if (rdp->validResponse) {
+            		lastResultCode = rdp->resultCode;
+            		if ((! rdp->isError) && (rdp->wordFromBytes(rdp->dataBytes,0) == templateId)) {
+                        res = true;
+                    }
+                }
+                else lastResultCode = rdp->wordFromBytes(rdp->dataBytes,0);
+                delete rdp;
+            }
+            else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
+        }
+        else lastResultCode = rp->wordFromBytes(rp->dataBytes,0);
+	}
+    delete rp;
+
+	if (useDebug) {
+		debugTarget->print(F("FPS - writeTemplate Result="));
+		debugTarget->print(res);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -957,7 +1307,7 @@ word FPS_CAMA::getBrokenTemplate()
 bool FPS_CAMA::setSecurityLevel(word securityLevel)
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - setSecurityLevel");
+	if (useDebug) debugTarget->println(F("FPS - setSecurityLevel"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::SetSecurityLevel,2);
 	cp->addWordToCommandData(0, securityLevel);
@@ -979,12 +1329,12 @@ bool FPS_CAMA::setSecurityLevel(word securityLevel)
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - setSecurityLevel Result=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - setSecurityLevel Result="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1007,7 +1357,7 @@ bool FPS_CAMA::setSecurityLevel(word securityLevel)
 word FPS_CAMA::getSecurityLevel()
 {
 	word res = 0;
-	if (useSerialDebug) Serial.println("FPS - getSecurityLevel");
+	if (useDebug) debugTarget->println(F("FPS - getSecurityLevel"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::GetSecurityLevel,0);
 
@@ -1027,12 +1377,12 @@ word FPS_CAMA::getSecurityLevel()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - getSecurityLevel Result =");
-		Serial.print(res);
-        Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - getSecurityLevel Result ="));
+		debugTarget->print(res);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1060,7 +1410,7 @@ word FPS_CAMA::getSecurityLevel()
 bool FPS_CAMA::setFingerTimeout(word fingerTimeout)
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - setFingerTimeout");
+	if (useDebug) debugTarget->println(F("FPS - setFingerTimeout"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::SetFingerTimeOut,2);
 	cp->addWordToCommandData(0, fingerTimeout);
@@ -1082,12 +1432,12 @@ bool FPS_CAMA::setFingerTimeout(word fingerTimeout)
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - setFingerTimeout Result=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - setFingerTimeout Result="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1110,7 +1460,7 @@ bool FPS_CAMA::setFingerTimeout(word fingerTimeout)
 word FPS_CAMA::getFingerTimeout()
 {
 	word res = 0;
-	if (useSerialDebug) Serial.println("FPS - getFingerTimeout");
+	if (useDebug) debugTarget->println(F("FPS - getFingerTimeout"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::GetFingerTimeOut,0);
 
@@ -1130,12 +1480,12 @@ word FPS_CAMA::getFingerTimeout()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - getFingerTimeout Result =");
-		Serial.print(res);
-        Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - getFingerTimeout Result ="));
+		debugTarget->print(res);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1159,7 +1509,7 @@ word FPS_CAMA::getFingerTimeout()
 bool FPS_CAMA::setDeviceId(word deviceId)
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - setDeviceId");
+	if (useDebug) debugTarget->println(F("FPS - setDeviceId"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::SetDeviceId,2);
 	cp->addWordToCommandData(0, deviceId);
@@ -1181,12 +1531,12 @@ bool FPS_CAMA::setDeviceId(word deviceId)
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - setDeviceId Result=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - setDeviceId Result="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1209,7 +1559,7 @@ bool FPS_CAMA::setDeviceId(word deviceId)
 word FPS_CAMA::getDeviceId()
 {
 	word res = 0;
-	if (useSerialDebug) Serial.println("FPS - getDeviceId");
+	if (useDebug) debugTarget->println(F("FPS - getDeviceId"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::GetDeviceId,0);
 
@@ -1230,12 +1580,12 @@ word FPS_CAMA::getDeviceId()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - getDeviceId Result =");
-		Serial.print(res);
-        Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - getDeviceId Result ="));
+		debugTarget->print(res);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1258,7 +1608,7 @@ word FPS_CAMA::getDeviceId()
 word FPS_CAMA::getFirmwareVersion()
 {
 	word res = 0;
-	if (useSerialDebug) Serial.println("FPS - getFirmwareVersion");
+	if (useDebug) debugTarget->println(F("FPS - getFirmwareVersion"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::GetFWVersion,0);
 
@@ -1278,12 +1628,12 @@ word FPS_CAMA::getFirmwareVersion()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - getFirmwareVersion Result =");
-		Serial.print(res);
-        Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - getFirmwareVersion Result ="));
+		debugTarget->print(res);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1309,7 +1659,7 @@ word FPS_CAMA::getFirmwareVersion()
 bool FPS_CAMA::fingerDetect()
 {
 	word res = false;
-	if (useSerialDebug) Serial.println("FPS - fingerDetect");
+	if (useDebug) debugTarget->println(F("FPS - fingerDetect"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::FingerDetect,0);
 
@@ -1329,12 +1679,12 @@ bool FPS_CAMA::fingerDetect()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - fingerDetect Result =");
-		Serial.print(res);
-        Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - fingerDetect Result ="));
+		debugTarget->print(res);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1362,7 +1712,7 @@ bool FPS_CAMA::fingerDetect()
 bool FPS_CAMA::setBaudrate(word baudrate)
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - setBaudrate");
+	if (useDebug) debugTarget->println(F("FPS - setBaudrate"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::SetBaudRate,2);
 	cp->addWordToCommandData(0, baudrate);
@@ -1384,12 +1734,12 @@ bool FPS_CAMA::setBaudrate(word baudrate)
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - setBaudrate Result=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - setBaudrate Result="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1413,7 +1763,7 @@ bool FPS_CAMA::setBaudrate(word baudrate)
 bool FPS_CAMA::setDuplicationCheck(bool duplicationCheck)
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - setDuplicationCheck");
+	if (useDebug) debugTarget->println(F("FPS - setDuplicationCheck"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::SetDuplicationCheck,2);
 	cp->addWordToCommandData(0, (duplicationCheck ? 1 : 0));
@@ -1435,12 +1785,12 @@ bool FPS_CAMA::setDuplicationCheck(bool duplicationCheck)
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - setDuplicationCheck Result=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - setDuplicationCheck Result="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1463,7 +1813,7 @@ bool FPS_CAMA::setDuplicationCheck(bool duplicationCheck)
 bool FPS_CAMA::getDuplicationCheck()
 {
 	word res = 0;
-	if (useSerialDebug) Serial.println("FPS - getDuplicationCheck");
+	if (useDebug) debugTarget->println(F("FPS - getDuplicationCheck"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::GetDuplicationCheck,0);
 
@@ -1483,12 +1833,12 @@ bool FPS_CAMA::getDuplicationCheck()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - getDuplicationCheck Result =");
-		Serial.print(res);
-        Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - getDuplicationCheck Result ="));
+		debugTarget->print(res);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1515,7 +1865,7 @@ bool FPS_CAMA::getDuplicationCheck()
 bool FPS_CAMA::standbyMode()
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - standbyMode");
+	if (useDebug) debugTarget->println(F("FPS - standbyMode"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::EnterStandbyMode,0);
 
@@ -1535,12 +1885,12 @@ bool FPS_CAMA::standbyMode()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - standbyMode Result =");
-		Serial.print(res);
-        Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - standbyMode Result ="));
+		debugTarget->print(res);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1563,7 +1913,7 @@ bool FPS_CAMA::standbyMode()
 bool FPS_CAMA::setSensorLed(bool ledEnabled)
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - setSensorLed");
+	if (useDebug) debugTarget->println(F("FPS - setSensorLed"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::SensorLEDControl,2);
 	cp->addWordToCommandData(0, (ledEnabled ? 1 : 0));
@@ -1584,12 +1934,12 @@ bool FPS_CAMA::setSensorLed(bool ledEnabled)
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - setSensorLed Result=");
-		Serial.print(res);
-		Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - setSensorLed Result="));
+		debugTarget->print(res);
+		debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1612,7 +1962,7 @@ bool FPS_CAMA::setSensorLed(bool ledEnabled)
 word FPS_CAMA::getEnrollCount()
 {
 	word res = 0;
-	if (useSerialDebug) Serial.println("FPS - getEnrollCount");
+	if (useDebug) debugTarget->println(F("FPS - getEnrollCount"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::GetEnrollCount,0);
 
@@ -1633,12 +1983,12 @@ word FPS_CAMA::getEnrollCount()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - getEnrollCount Result =");
-		Serial.print(res);
-        Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - getEnrollCount Result ="));
+		debugTarget->print(res);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1680,7 +2030,7 @@ word FPS_CAMA::getEnrollCount()
 void FPS_CAMA::sendFPCancel()
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - sendFPCancel");
+	if (useDebug) debugTarget->println(F("FPS - sendFPCancel"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::FPCancel,0);
 
@@ -1693,7 +2043,7 @@ void FPS_CAMA::sendFPCancel()
 bool FPS_CAMA::getFPCancelResult()
 {
 	bool res = false;
-	if (useSerialDebug) Serial.println("FPS - getFPCancelResult");
+	if (useDebug) debugTarget->println(F("FPS - getFPCancelResult"));
 
 	Response_Packet* rp = getResponse(Command_Packet::Commands::FPCancel);
 
@@ -1705,14 +2055,14 @@ bool FPS_CAMA::getFPCancelResult()
 	}
 	delete rp;
 
-	if (useSerialDebug) {
-		Serial.print("FPS - getFPCancelResult Result =");
-		Serial.print(res);
-        Serial.print(", current ResultCode=0x");
-		Serial.print(rp->resultCode, HEX);
-        Serial.print(", lastResultCode=0x");
-		Serial.print(lastResultCode, HEX);
-		Serial.println();
+	if (useDebug) {
+		debugTarget->print(F("FPS - getFPCancelResult Result ="));
+		debugTarget->print(res);
+        debugTarget->print(F(", current ResultCode=0x"));
+		debugTarget->print(rp->resultCode, HEX);
+        debugTarget->print(F(", lastResultCode=0x"));
+		debugTarget->print(lastResultCode, HEX);
+		debugTarget->println();
 	}
 
 	return res;
@@ -1735,7 +2085,7 @@ bool FPS_CAMA::testConnection(bool retry)
 {
     byte retryCount=3;
     bool res = false;
-	if (useSerialDebug) Serial.println("FPS - testConnection");
+	if (useDebug) debugTarget->println(F("FPS - testConnection"));
 
 	Command_Packet* cp = new Command_Packet(Command_Packet::Commands::TestConnection,0);
 
@@ -1756,10 +2106,10 @@ bool FPS_CAMA::testConnection(bool retry)
     	}
         else if (retry) {
             done = false;
-            if (useSerialDebug) {
-                Serial.print("Response invalid - read one more response if data is there and try again (");
-                Serial.print(i);
-                Serial.println(")");
+            if (useDebug) {
+                debugTarget->print(F("Response invalid - read one more response if data is there and try again ("));
+                debugTarget->print(i);
+                debugTarget->println(F(")"));
             }
             // we read what's there and then try again incl. request
             Response_Packet* rp2 = readAvailableResponse();
@@ -1771,12 +2121,12 @@ bool FPS_CAMA::testConnection(bool retry)
         }
     	delete rp;
 
-    	if (useSerialDebug) {
-    		Serial.print("FPS - testConnection Result =");
-    		Serial.print(res);
-            Serial.print(", lastResultCode=0x");
-    		Serial.print(lastResultCode, HEX);
-    		Serial.println();
+    	if (useDebug) {
+    		debugTarget->print(F("FPS - testConnection Result ="));
+    		debugTarget->print(res);
+            debugTarget->print(F(", lastResultCode=0x"));
+    		debugTarget->print(lastResultCode, HEX);
+    		debugTarget->println();
     	}
         if (done) break;
     }
@@ -1787,20 +2137,20 @@ bool FPS_CAMA::testConnection(bool retry)
 }
 
 // Sends the command to the software serial channel
-//DONE
+
 void FPS_CAMA::sendCommand(byte cmd[], int length)
 {
 	_serial->write(cmd, length);
-	if (useSerialDebug)
+	if (useDebug)
 	{
-		Serial.print("FPS - SEND: ");
+		debugTarget->print(F("FPS - SEND: "));
 		sendToSerial(cmd, length);
-		Serial.println();
+		debugTarget->println();
 	}
 };
 
 // Gets the response to the command from the software serial channel (and waits for it)
-//DONE
+
 Response_Packet* FPS_CAMA::getResponse(Command_Packet::Commands::Commands_Enum awaitedResponseCode)
 {
 	byte firstbyte = 0;
@@ -1809,7 +2159,7 @@ Response_Packet* FPS_CAMA::getResponse(Command_Packet::Commands::Commands_Enum a
     byte* resp = new byte[24];
 	while (done == false)
 	{
-        while ((_serial->available() == false) && (millis()<=timeoutTime)) delay(50);
+        while ((!_serial->available()) && (millis()<=timeoutTime)) delay(50);
 		firstbyte = (byte)_serial->read();
 		if (firstbyte == Response_Packet::RESPONSE_START_CODE_1)
 		{
@@ -1821,7 +2171,7 @@ Response_Packet* FPS_CAMA::getResponse(Command_Packet::Commands::Commands_Enum a
         resp[0] = firstbyte;
     	for (int i=1; i < 24; i++)
     	{
-    		while ((_serial->available() == false) && (millis()<=timeoutTime)) delay(50);
+    		while ((!_serial->available()) && (millis()<=timeoutTime)) delay(50);
             if (millis()>timeoutTime) {
                 done = false;
                 break;
@@ -1829,32 +2179,33 @@ Response_Packet* FPS_CAMA::getResponse(Command_Packet::Commands::Commands_Enum a
             resp[i]= (byte) _serial->read();
     	}
 
-    	if (useSerialDebug)
+    	if (useDebug)
     	{
-    		Serial.print("FPS - RECV: ");
+    		debugTarget->print(F("FPS - RECV: "));
     		sendToSerial(resp, 24);
-    		Serial.println();
+    		debugTarget->println();
     	}
     }
     if (!done) {
+        delete resp;
         resp = NULL;
     }
 
-	Response_Packet* rp = new Response_Packet(resp, awaitedResponseCode, useSerialDebug);
+	Response_Packet* rp = new Response_Packet(resp, awaitedResponseCode, useDebug, debugTarget);
 	delete resp;
 
-	if (useSerialDebug)
+	if (useDebug)
 	{
-		Serial.println("FPS - Response: ");
-		Serial.print("validResponse= ");
-		Serial.println(rp->validResponse);
-		Serial.print("resultCode= ");
-		Serial.println(rp->resultCode);
-		Serial.print("(real) dataLength= ");
-		Serial.println(rp->dataLength);
-		Serial.print("dataBytes: ");
+		debugTarget->println(F("FPS - Response: "));
+		debugTarget->print(F("validResponse= "));
+		debugTarget->println(rp->validResponse);
+		debugTarget->print(F("resultCode= "));
+		debugTarget->println(rp->resultCode);
+		debugTarget->print(F("(real) dataLength= "));
+		debugTarget->println(rp->dataLength);
+		debugTarget->print(F("dataBytes: "));
 		sendToSerial(rp->dataBytes, 14);
-		Serial.println();
+		debugTarget->println();
 	}
 
 	return rp;
@@ -1862,7 +2213,7 @@ Response_Packet* FPS_CAMA::getResponse(Command_Packet::Commands::Commands_Enum a
 
 // Gets the response to the command from the software serial channel if one is there
 // returns NULL when not or invalid
-//DONE
+
 Response_Packet* FPS_CAMA::readAvailableResponse()
 {
     if (!_serial->available()) return NULL;
@@ -1887,57 +2238,132 @@ Response_Packet* FPS_CAMA::readAvailableResponse()
 		resp[i]= (byte) _serial->read();
         if (!_serial->available()) break;
 	}
-    if (i<24) return NULL;
+    if (i<24) {
+        delete resp;
+        return NULL;
+    }
 
-	if (useSerialDebug)
+	if (useDebug)
 	{
-		Serial.print("FPS - RECV: ");
+		debugTarget->print(F("FPS - RECV: "));
 		sendToSerial(resp, 24);
-		Serial.println();
+		debugTarget->println();
 	}
 
-	Response_Packet* rp = new Response_Packet(resp, 0xFFFF, useSerialDebug);
+	Response_Packet* rp = new Response_Packet(resp, 0xFFFF, useDebug, debugTarget);
 	delete resp;
 
-	if (useSerialDebug)
+	if (useDebug)
 	{
-		Serial.println("FPS - Response: ");
-		Serial.print("validResponse= ");
-		Serial.println(rp->validResponse);
-		Serial.print("resultCode= ");
-		Serial.println(rp->resultCode);
-		Serial.print("(real) dataLength= ");
-		Serial.println(rp->dataLength);
-		Serial.print("dataBytes: ");
+		debugTarget->println(F("FPS - Response: "));
+		debugTarget->print(F("validResponse= "));
+		debugTarget->println(rp->validResponse);
+		debugTarget->print(F("resultCode= "));
+		debugTarget->println(rp->resultCode);
+		debugTarget->print(F("(real) dataLength= "));
+		debugTarget->println(rp->dataLength);
+		debugTarget->print(F("dataBytes: "));
 		sendToSerial(rp->dataBytes, 14);
-		Serial.println();
+		debugTarget->println();
 	}
 
 	return rp;
 };
 
+// Gets the response data to the command from the software serial channel (and waits for it)
+Response_Data_Packet* FPS_CAMA::getResponseData(Command_Packet::Commands::Commands_Enum awaitedResponseCode, word dataLength)
+{
+	byte firstbyte = 0;
+	bool done = false;
+    unsigned long timeoutTime = millis() + serialTimeout;
+    byte* resp = new byte[dataLength+10];
+    memset(resp, 0, dataLength+10);
+    Serial.print(F("Serial-Available: "));
+    Serial.println(_serial->available());
+    while (done == false)
+	{
+        while ((! _serial->available()) && (millis()<=timeoutTime)) delay(50);
+		firstbyte = (byte)_serial->read();
+		if (firstbyte == Response_Data_Packet::RESPONSE_START_CODE_1)
+		{
+			done = true;
+		}
+        if (millis()>timeoutTime) break;
+	}
+    if (done) {
+        resp[0] = firstbyte;
+        int i;
+    	for (i=1; i < (dataLength+10); i++)
+    	{
+            Serial.println(_serial->available());
+    		while ((!_serial->available()) && (millis()<=timeoutTime)) delay(50);
+            if (millis()>timeoutTime) {
+                done = false;
+                Serial.println(F("TIMEOUT"));
+                break;
+            }
+            resp[i]= (byte) _serial->read();
+            /*Serial.print(i);
+            Serial.print(F(": "));
+            serialPrintHex(resp[i]);
+            Serial.println();*/
+    	}
+
+    	if (useDebug)
+    	{
+    		debugTarget->print(F("FPS - RECV ("));
+            debugTarget->print(i);
+            debugTarget->print(F("): "));
+    		sendToSerial(resp, dataLength+10);
+    		debugTarget->println();
+    	}
+    }
+    if (!done) {
+        delete resp;
+        resp = NULL;
+    }
+
+	Response_Data_Packet* rp = new Response_Data_Packet(resp, awaitedResponseCode, useDebug, debugTarget);
+	delete resp;
+
+	if (useDebug)
+	{
+		debugTarget->println(F("FPS - Response: "));
+		debugTarget->print(F("validResponse= "));
+		debugTarget->println(rp->validResponse);
+		debugTarget->print(F("resultCode= "));
+		debugTarget->println(rp->resultCode);
+		debugTarget->print(F("(real) dataLength= "));
+		debugTarget->println(rp->dataLength);
+		debugTarget->print(F("dataBytes: "));
+		sendToSerial(rp->dataBytes, rp->dataLength);
+		debugTarget->println();
+	}
+
+	return rp;
+};
 
 // sends the bye aray to the serial debugger in our hex format EX: "00 AF FF 10 00 13"
-//DONE
+
 void FPS_CAMA::sendToSerial(byte data[], int length)
 {
   boolean first=true;
-  Serial.print("\"");
+  debugTarget->print(F("\""));
   for(int i=0; i<length; i++)
   {
-    if (first) first=false; else Serial.print(" ");
+    if (first) first=false; else debugTarget->print(F(" "));
     serialPrintHex(data[i]);
   }
-  Serial.print("\"");
+  debugTarget->print(F("\""));
 }
 
 // sends a byte to the serial debugger in the hex format we want EX "0F"
-//DONE
+
 void FPS_CAMA::serialPrintHex(byte data)
 {
   char tmp[16];
   sprintf(tmp, "%.2X",data);
-  Serial.print(tmp);
+  debugTarget->print(tmp);
 }
 
 void FPS_CAMA::setUserActionCallback(FPSUserActionCallbackFunction callback)

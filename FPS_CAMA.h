@@ -11,6 +11,9 @@
 
 #include "Arduino.h"
 #include "Stream.h"
+
+#define FPS_TEMPLATE_SIZE 498
+
 /*
 	Command Packet is the instruction from Host to Target (CAMA-SM Series),
 	Total length of the command packet is 24 Bytes
@@ -74,6 +77,7 @@ class Command_Packet
 		void addIntToCommandData(byte index, int value);    // add a int to CommandData array starting at Index index
 
 		Command_Packet(Commands::Commands_Enum _command, word _dataLength);
+        ~Command_Packet();
 
 	private:
 		static const byte COMMAND_START_CODE_1 = 0x55;	// Static byte to mark the beginning of a command packet	-	never changes
@@ -146,11 +150,14 @@ class Response_Packet
 
 				static ResultCodes_Enum parseFromBytes(word resultCode);
 		};
-		Response_Packet(byte* buffer, word awaitedResponseCode, bool useSerialDebug);
+        static const byte RESPONSE_START_CODE_1 = 0xAA;	// Static byte to mark the beginning of a command packet	-	never changes
+		static const byte RESPONSE_START_CODE_2 = 0x55;	// Static byte to mark the beginning of a command packet	-	never changes
+
+		Response_Packet(byte* buffer, word awaitedResponseCode, bool useDebug, Print *debugTarget);
+        ~Response_Packet();
+
 		ResultCodes::ResultCodes_Enum resultCode;
 		bool isError;
-		static const byte RESPONSE_START_CODE_1 = 0xAA;	// Static byte to mark the beginning of a command packet	-	never changes
-		static const byte RESPONSE_START_CODE_2 = 0x55;	// Static byte to mark the beginning of a command packet	-	never changes
 		word dataLength;
 		byte dataBytes[14];
 		bool validResponse;
@@ -158,86 +165,64 @@ class Response_Packet
 		word wordFromBytes(byte* buffer, byte index);
 
 	private:
-		bool checkParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool useSerialDebug);
+		bool checkParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool useDebug, Print *debugTarget);
 		word calculateChecksum(byte* buffer, int length);
 		byte getHighByte(word w);
 		byte getLowByte(word w);
 };
 
-//#pragma region -= Command_Data_Packet =-
 /*
 	When length of Command Parameter or Data is larger than 16 Bytes,
-	Utilize Data Packet to transmit block Data, the maximum length of Data Packet is 512Bytes
+    Utilize Data Packet to transmit block Data, the maximum length of
+    Data Packet is 512Bytes
 */
-// Data Mule packet for receiving large data(in 128 byte pieces) from the FPS
-// This class can only transmit one packet at a time
-//class Data_Packet
-//{
-//public:
-//	static int CheckSum;
-//	int PacketID;
-//	int ValidByteLength;
-//	byte Data[128];
-//	void StartNewPacket();
-//	bool IsLastPacket;
-//private:
-//	static int NextPacketID;
-//};
 class Command_Data_Packet
 {
 	public:
-		Command_Data_Packet(byte* buffer, bool UseSerialDebug);
-		byte RawBytes[12];
-		byte ParameterBytes[4];
-		byte ResponseBytes[2];
-		bool ACK;
-		static const byte COMMAND_START_CODE_1 = 0x5A;	// Static byte to mark the beginning of a command packet	-	never changes
-		static const byte COMMAND_START_CODE_2 = 0x5A;	// Static byte to mark the beginning of a command packet	-	never changes
-		int IntFromParameter();
+		Command_Data_Packet(Command_Packet::Commands::Commands_Enum _command, byte* _commandData, word _dataLength, word _dataAddLength);
+        ~Command_Data_Packet();
+        Command_Packet::Commands::Commands_Enum command;
+        word commandDataLength;
+        word commandDataAddLength;
+        byte* commandDataAdd;	            // Parameter up to 16 bytes, changes meaning depending on command
+        byte* commandData;					// Parameter up to 16 bytes, changes meaning depending on command
+        byte* getPacketBytes();				// returns the bytes to be transmitted
+        void addByteToCommandAddData(byte index, byte value);  // add a byte to CommandData array starting at Index index
+		void addWordToCommandAddData(byte index, word value);  // add a word to CommandData array starting at Index index
+		void addIntToCommandAddData(byte index, int value);    // add a int to CommandData array starting at Index index
 
 	private:
-		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool UseSerialDebug);
-		word CalculateChecksum(byte* buffer, int length);
-		byte GetHighByte(word w);
-		byte GetLowByte(word w);
-};
-//#pragma endregion
+        static const byte COMMAND_START_CODE_1 = 0x5A;	// Static byte to mark the beginning of a command packet	-	never changes
+		static const byte COMMAND_START_CODE_2 = 0xA5;	// Static byte to mark the beginning of a command packet	-	never changes
 
-//#pragma region -= Response_Data_Packet =-
-/*
-	When length of Command Parameter or Data is larger than 16 Bytes,
-	Utilize Data Packet to transmit block Data, the maximum length of Data Packet is 512Bytes
-*/
-// Data Mule packet for receiving large data(in 128 byte pieces) from the FPS
-// This class can only transmit one packet at a time
-//class Data_Packet
-//{
-//public:
-//	static int CheckSum;
-//	int PacketID;
-//	int ValidByteLength;
-//	byte Data[128];
-//	void StartNewPacket();
-//	bool IsLastPacket;
-//private:
-//	static int NextPacketID;
-//};
+        word calculateChecksum(byte* data);	// Checksum is calculated using byte addition
+		byte getHighByte(word w);
+		byte getLowByte(word w);
+};
+
+
 class Response_Data_Packet
 {
 	public:
-		Response_Data_Packet(byte* buffer, bool UseSerialDebug);
-		byte RawBytes[24];
-		static const byte RESPONSE_START_CODE_1 = 0xA5;	// Static byte to mark the beginning of a command packet	-	never changes
+        static const byte RESPONSE_START_CODE_1 = 0xA5;	// Static byte to mark the beginning of a command packet	-	never changes
 		static const byte RESPONSE_START_CODE_2 = 0x5A;	// Static byte to mark the beginning of a command packet	-	never changes
-		int IntFromParameter();
+
+        Response_Data_Packet(byte* buffer, word awaitedResponseCode, bool useDebug, Print *debugTarget);
+        ~Response_Data_Packet();
+		Response_Packet::ResultCodes::ResultCodes_Enum resultCode;
+		bool isError;
+		word dataLength;
+		byte* dataBytes;
+		bool validResponse;
+		int intFromBytes(byte* buffer, byte index);
+		word wordFromBytes(byte* buffer, byte index);
 
 	private:
-		bool CheckParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool UseSerialDebug);
-		word CalculateChecksum(byte* buffer, int length);
-		byte GetHighByte(word w);
-		byte GetLowByte(word w);
+		bool checkParsing(byte b, byte propervalue, byte alternatevalue, char* varname, bool useDebug, Print *debugTarget);
+		word calculateChecksum(byte* buffer, int length);
+		byte getHighByte(word w);
+		byte getLowByte(word w);
 };
-//#pragma endregion
 
 
 typedef bool(*FPSUserActionCallbackFunction)(const Command_Packet::Commands::Commands_Enum command, const Response_Packet::ResultCodes::ResultCodes_Enum action);
@@ -254,10 +239,12 @@ class FPS_CAMA
 
     word getLastResultCode();
 
-    // Enables verbose debug output using hardware Serial
-    void setSerialDebug(bool debug);
+    void setDebugTarget(Print* target);
 
-    bool setSerialDebug();
+    // Enables verbose debug output using a Print Stream , default is Serial
+    void setDebug(bool debug);
+
+    bool setDebug();
 
     void setSerialTimeout(word timeout);
 
@@ -291,6 +278,12 @@ class FPS_CAMA
 
     // [Function] Get Broken Template
 	word getBrokenTemplate();
+
+    // [Function] Read Template
+	bool readTemplate(word templateId, byte* templatePtr);
+
+    // [Function] Write Template
+	bool writeTemplate(word templateId, byte* templatePtr);
 
     // [Function] Set Security Level
 	bool setSecurityLevel(word securityLevel);
@@ -354,7 +347,8 @@ class FPS_CAMA
 	 void setUserActionCallback(FPSUserActionCallbackFunction callback);
 
 private:
-    bool useSerialDebug = false;
+    bool useDebug = false;
+    Print* debugTarget = &Serial;
 
     // Timeout for serial read in ms, should be higher then the Finger-Timeout because else it may produce problems
 	word serialTimeout = 6000;
@@ -365,7 +359,8 @@ private:
     void serialPrintHex(byte data);
     void sendToSerial(byte data[], int length);
 	void sendCommand(byte cmd[], int length);
-	Response_Packet* getResponse(Command_Packet::Commands::Commands_Enum awaitedResponseCode);
+    Response_Packet* getResponse(Command_Packet::Commands::Commands_Enum awaitedResponseCode);
+    Response_Data_Packet* getResponseData(Command_Packet::Commands::Commands_Enum awaitedResponseCode, word dataLength);
 	Stream* _serial;
 	FPSUserActionCallbackFunction userActionCallback = 0;
 };
