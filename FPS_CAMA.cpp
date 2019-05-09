@@ -3,7 +3,7 @@
 	Created by Ingo Fischer, December 2015
 	Licensed for non-commercial use, must include this license message
 	basically, Feel free to hack away at it, but just give me credit for my work =)
-	TLDR; Wil Wheaton's Law
+	TLDR; Will Wheaton's Law
 */
 
 #include "FPS_CAMA.h"
@@ -2343,7 +2343,7 @@ Response_Data_Packet* FPS_CAMA::getResponseData(Command_Packet::Commands::Comman
 	return rp;
 };
 
-// sends the bye aray to the serial debugger in our hex format EX: "00 AF FF 10 00 13"
+// sends the bye array to the serial debugger in our hex format EX: "00 AF FF 10 00 13"
 
 void FPS_CAMA::sendToSerial(byte data[], int length)
 {
