@@ -14,7 +14,7 @@
 // Hardware setup - FPS connected to:
 //	  digital pin 4(arduino rx, fps tx)
 //	  digital pin 5(arduino tx - 560ohm resistor fps tx - 1000ohm resistor - ground)
-//		this brings the 5v tx line down to about 3.2v so we dont fry our fps
+//		this brings the 5v tx line down to about 3.2v so we don't fry our fps
 
 SoftwareSerial fpsSoftSerial(4, 5); // RX, TX
 

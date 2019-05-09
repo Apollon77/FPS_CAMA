@@ -3,7 +3,7 @@
 	Created by Ingo Fischer, December 2015
 	Licensed for non-commercial use, must include this license message
 	basically, Feel free to hack away at it, but just give me credit for my work =)
-	TLDR; Wil Wheaton's Law
+	TLDR; Will Wheaton's Law
 */
 
 #ifndef FPS_CAMA_h
